@@ -1,0 +1,90 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class Bullet : MonoBehaviour 
+{
+
+	public enum BulletType
+	{
+		Pistol,
+		Rifle,
+		Shotgun,
+		Sniper,
+		None
+	}
+	// m_eBullet
+	
+	private BulletType m_eBullet;
+	private float m_fBulletSpeed = 1.0f;
+	private int m_iDamage = 10;
+	private Ray m_ray;
+	private RaycastHit m_rHit;
+	private float m_fDistanceTraveled = 0;
+	private float m_fBulletRange = 100;
+	
+	// Use this for initialization
+	void Start ()
+	{
+		tag = "Bullet";
+		// automatically destroy the bullet after 3 seconds. a bullet still hasn't hit anything
+		// after 3 seconds of travel time, something has gone wrong
+		Destroy (gameObject, 2);
+	}
+	
+	void Update ()
+	{
+		BulletBehavior();
+	}
+	
+	void BulletBehavior()
+	{
+		m_ray = new Ray(transform.position, transform.forward);
+		Physics.Raycast (m_ray, out m_rHit, m_fBulletSpeed);
+		//if (!m_rHit.collider || m_rHit.collider.tag == "WeaponSpawner")
+		//{
+			//it is still live and flying, move bullet to new physics position;
+			m_fDistanceTraveled += Vector3.Distance (transform.position, m_ray.GetPoint(m_fBulletSpeed));
+			transform.position = m_ray.GetPoint(m_fBulletSpeed);
+
+			if (m_fDistanceTraveled >= m_fBulletRange)
+			{
+				Destroy (gameObject);
+			}
+		//}
+//		else
+//		{
+//			transform.position = m_rHit.point;
+//			Health dBB = m_rHit.collider.GetComponent<Health>();
+//			if (dBB)
+//				dBB.TakeDamage (m_iDamage);
+//			//Destroy (gameObject);
+//				
+//		}
+	}
+	
+	public void setBulletSpeed(float input)
+	{
+		m_fBulletSpeed = input;
+	}
+	
+	public void setDamage(int input)
+	{
+		m_iDamage = input;
+	}
+	
+	void OnDrawGizmos()
+	{
+		Gizmos.color = Color.red;
+		Gizmos.DrawSphere(transform.position, 0.2f);
+	}
+
+	public int GetDamage()
+	{
+		return m_iDamage;
+	}
+	
+	// bullets have position, direction, damage, speed
+	// position and direction are determined upon firing, damage is determined by prefab
+	// we'll have four different prefabs
+	// use public enum to denote which bullet type it is
+}
