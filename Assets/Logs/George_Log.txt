@@ -1,0 +1,15 @@
+[Name] AKA: Ballfire  you may add a kool Screen Name Here
+
+Daily Log
+
+#Example
+-------------------------------------------------------------------------------------------------
+|9/8/14   BUGFIX: had resources and victory pts backwards (coding blind, haven't been in yet)	|
+|	  UPD: changed the scoretab bar indicator so its on the side closest to the winner	|
+|         add: score keeper support for the new BGs						|
+|         add: premade requriements now enforced (ie: level, resil, and ilevel)			|		|												|
+|												|
+|9/7/14  N/A											|		
+-------------------------------------------------------------------------------------------------
+
+9/8/14   add: My Daily Log.txt
