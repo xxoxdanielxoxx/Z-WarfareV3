@@ -1,0 +1,33 @@
+[Name] Stephen AKA: Tech
+
+Daily Log
+
+9/6/14	add: My Daily Log.txt
+	add: Fuckin' tons, yo
+	add: Weapon prefabs and Weapon Pickup prefabs
+	add: AmmoManager script, holds ammo for gun
+	chg: Gun script is now named GunProperties script
+	chg: GunProperties, now reloads gun
+	chg: WeaponManager, now manages guns in a way that doesn't suck
+	chg: All scenes are now at a more updated version (I think)
+	chg: Player controller prefab now instantiates weapons instead of just turning on and off gameobjects
+	chg: No more BulletSocket/GunPrefab nonsense in the inspector! Seriously, why did I do that.
+	##### IMPORTANT NOTES ###########################################
+	Gun script has been renamed to GunProperties. There is a deactivated Player Controller prefab that
+	Josh was probably using to tune the size of the player in the scene, and it says that referenced
+	scripts are missing: that's due to the script name change.
+	
+	CollisionDetection mode for weapon pickups has been changed to continuous. Unity Manual says that 
+	continuous detection causes more of a performance hit, but it is possible for the weapon to fall 
+	through the ground if it falls from a high enough height when set to discrete.
+
+	WeaponManager's enum Slot has been changed, so the SetRemoteWeaponSwitch() will probably be broken
+	on one of George's scripts.
+
+	Weapon Pickup destroys itself once picked up off the ground or when all of the ammo has been
+	taken off of it. It occurs by invoking GunPickupTaken() on GunProperties. George will probably 
+	want that altered for his networking code.
+
+	WeaponSpawner destroys itself if it is only supposed to spawn a gun once. Not sure if this funcionality
+	will even be needed for final game, but George will probably want it altered for networking code.
+	#################################################################	

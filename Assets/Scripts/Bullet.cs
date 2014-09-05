@@ -62,12 +62,12 @@ public class Bullet : MonoBehaviour
 //		}
 	}
 	
-	public void setBulletSpeed(float input)
+	public void SetBulletSpeed(float input)
 	{
 		m_fBulletSpeed = input;
 	}
 	
-	public void setDamage(int input)
+	public void SetDamage(int input)
 	{
 		m_iDamage = input;
 	}

@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[ExecuteInEditMode]
 public class WeaponSpawner : MonoBehaviour 
 {
 	public enum Gun
@@ -11,70 +10,87 @@ public class WeaponSpawner : MonoBehaviour
 		Rifle,
 		Sniper
 	}
-
-	public GameObject m_pistolPrefab;
-	public GameObject m_shotgunPrefab;
-	public GameObject m_riflePrefab;
-	public GameObject m_sniperPrefab;
-	private Gun m_prevGun = Gun.Pistol;
-	public Gun m_gun = Gun.Pistol;
 	
+	public Gun m_eGun = Gun.Pistol;
+	public float m_fTimerInitialDelay = 2;
+	public float m_fTimer = 5;
+	private float m_fInitialGunTimer;
+	public bool m_spawnOnce = false;
+	private bool m_bGunSpawned = false;
+
 	// Use this for initialization
 	void Start () 
 	{
-		m_pistolPrefab.SetActive(true);
-		m_shotgunPrefab.SetActive(false);
-		m_riflePrefab.SetActive(false);
-		m_sniperPrefab.SetActive(false);
+		m_fInitialGunTimer = m_fTimer;
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		if (m_gun != m_prevGun)
+		if (m_spawnOnce && m_bGunSpawned)
 		{
-			if (m_gun == Gun.Pistol)
+			Destroy (gameObject);
+		}
+		
+		if (!m_bGunSpawned)
+		{
+			m_fTimerInitialDelay -= Time.deltaTime;
+			if (m_fTimerInitialDelay <= 0)
 			{
-				m_prevGun = Gun.Pistol;
-				m_pistolPrefab.SetActive(true);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_gun == Gun.Shotgun)
-			{
-				m_prevGun = Gun.Shotgun;
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(true);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_gun == Gun.Rifle)
-			{
-				m_prevGun = Gun.Rifle;
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(true);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_gun == Gun.Sniper)
-			{
-				m_prevGun = Gun.Sniper;
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(true);
+				m_fTimerInitialDelay = 0;
+				m_fTimer -= Time.deltaTime;
+				if (m_fTimer <= 0)
+				{
+					m_fTimer = m_fInitialGunTimer;
+					m_bGunSpawned = true;
+					SpawnGun ();
+				}
 			}
 		}
 	}
 	
+	private void SpawnGun()
+	{
+		GameObject m_newGun;
+		
+		if (m_eGun == Gun.Pistol)
+		{
+			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupPistol"), transform.position, transform.rotation);
+		}
+		else if (m_eGun == Gun.Shotgun)
+		{
+			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
+		}
+		else if (m_eGun == Gun.Rifle)
+		{
+			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+		}
+		else
+		{
+			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
+		}
+		m_newGun.GetComponent<AmmoManager>().MaxAmmo();
+		m_newGun.GetComponent<GunProperties>().SetWeaponSpawner(gameObject);
+		m_newGun.GetComponent<GunProperties>().MaxAmmo();
+	}
+	
 	public void ChangeWeapon(Gun input)
 	{
-		m_gun = input;
+		m_eGun = input;
 	}
 	
 	public void RemoveSpawner()
 	{
 		Destroy(gameObject);
+	}
+
+	public void SetGun(Gun input)
+	{
+		m_eGun = input;
+	}
+	
+	public void GunTaken()
+	{
+		m_bGunSpawned = false;
 	}
 }

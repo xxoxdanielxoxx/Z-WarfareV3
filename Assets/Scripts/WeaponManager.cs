@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WeaponManager : MonoBehaviour 
 {
@@ -14,407 +15,370 @@ public class WeaponManager : MonoBehaviour
 	
 	public enum Slot
 	{
-		Primary,
-		Secondary
+		Gun1,
+		Gun2
 	}
-	public GameObject m_pistolPrefab;
-	public GameObject m_shotgunPrefab;
-	public GameObject m_riflePrefab;
-	public GameObject m_sniperPrefab;
-	public Gun m_primary = Gun.Pistol;
-	public Gun m_secondary = Gun.None;
-	private Gun m_prevPrimary = Gun.Pistol;
-	private Gun m_prevSecondary = Gun.None;
+	
+	private Gun m_ePrimary = Gun.Pistol;
+	private Gun m_eSecondary = Gun.None;
 	private Slot m_currentGun;
-	Ray m_ray;
+	private GameObject m_heldGun;
+	private bool m_bCanPickUp = false;
+	private List<Collider> m_availablePickups;
+	private float m_fHoldETimer = 0.5f;
+	private float m_fInitialHoldETimer = 0.5f;
+	private bool m_bInPickupZone = false;
+	private int m_iPrimaryAmmo;
+	private int m_iPrimaryReserveAmmo;
+	private int m_iSecondaryAmmo;
+	private int m_iSecondaryReserveAmmo;
+	
 	// Use this for initialization
 	void Start () 
 	{
-		m_currentGun = Slot.Primary;
-		m_pistolPrefab.SetActive(false);
-		m_shotgunPrefab.SetActive(false);
-		m_riflePrefab.SetActive(false);
-		m_sniperPrefab.SetActive(false);
-		if (m_primary == Gun.Pistol)
-		{
-			m_pistolPrefab.SetActive(true);
-		}
-		if (m_primary == Gun.Shotgun)
-		{
-			m_shotgunPrefab.SetActive(true);
-		}
-		if (m_primary == Gun.Rifle)
-		{
-			m_riflePrefab.SetActive(true);
-		}
-		if (m_primary == Gun.Sniper)
-		{
-			m_sniperPrefab.SetActive(true);
-		}
+		m_availablePickups = new List<Collider>();
+		
+		m_currentGun = Slot.Gun1;
+		FirstGun(m_ePrimary);
 	}
 	
 	// Update is called once per frame
 	void Update ()
 	{
-		if (m_primary != m_prevPrimary)
-		{
-			m_prevPrimary = m_primary;
-			if (m_primary == Gun.Pistol)
-			{
-				m_pistolPrefab.SetActive(true);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_primary == Gun.Shotgun)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(true);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_primary == Gun.Rifle)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(true);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_primary == Gun.Sniper)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(true);
-			}
-		}
-		if (m_secondary != m_prevSecondary)
-		{
-			m_prevSecondary = m_secondary;
-			if (m_secondary == Gun.Pistol)
-			{
-				m_pistolPrefab.SetActive(true);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_secondary == Gun.Shotgun)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(true);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_secondary == Gun.Rifle)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(true);
-				m_sniperPrefab.SetActive(false);
-			}
-			else if (m_primary == Gun.Sniper)
-			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(true);
-			}
-		}
 		if (Input.GetKeyDown (KeyCode.Q))
-		{
 			SwitchWeapon();
+		if (Input.GetKey (KeyCode.E) && m_bInPickupZone)
+		{
+			m_fHoldETimer -= Time.deltaTime;
+			if (m_fHoldETimer <= 0)
+			{
+				m_bCanPickUp = true;
+				m_fHoldETimer = m_fInitialHoldETimer;
+			}
+		}
+		else
+		{
+			m_fHoldETimer = m_fInitialHoldETimer;
 		}
 	}
 	
 	public void SwitchWeapon()
 	{
-		if (m_currentGun == Slot.Primary)
+		if (m_currentGun == Slot.Gun1)
 		{
-			if (m_secondary != Gun.None)
+			if (m_eSecondary != Gun.None)
 			{
-				m_pistolPrefab.SetActive(false);
-				m_shotgunPrefab.SetActive(false);
-				m_riflePrefab.SetActive(false);
-				m_sniperPrefab.SetActive(false);
-				
-				m_currentGun = Slot.Secondary;
-				
-				if (m_secondary == Gun.Pistol)
-				{
-					m_pistolPrefab.SetActive(true);
-				}
-				else if (m_secondary == Gun.Shotgun)
-				{
-					m_shotgunPrefab.SetActive(true);
-				}
-				else if (m_secondary == Gun.Rifle)
-				{
-					m_riflePrefab.SetActive(true);
-				}
-				else if (m_primary == Gun.Sniper)
-				{
-					m_sniperPrefab.SetActive(true);
-				}
+				m_currentGun = Slot.Gun2;
+				SwitchGun();
 			}
 		}
 		else
 		{
-			m_pistolPrefab.SetActive(false);
-			m_shotgunPrefab.SetActive(false);
-			m_riflePrefab.SetActive(false);
-			m_sniperPrefab.SetActive(false);
-			
-			m_currentGun = Slot.Primary;
-			
-			if (m_primary == Gun.Pistol)
-			{
-				m_pistolPrefab.SetActive(true);
-			}
-			else if (m_primary == Gun.Shotgun)
-			{
-				m_shotgunPrefab.SetActive(true);
-			}
-			else if (m_primary == Gun.Rifle)
-			{
-				m_riflePrefab.SetActive(true);
-			}
-			else if (m_primary == Gun.Sniper)
-			{
-				m_sniperPrefab.SetActive(true);
-			}
+			m_currentGun = Slot.Gun1;
+			SwitchGun();
 		}
 	}
 	
 	void OnTriggerStay(Collider other)
 	{
-		if (other.tag == "WeaponSpawner")
+		if (other.tag == "Pickup")
 		{
-			if (Input.GetKeyDown(KeyCode.E))
+			m_bInPickupZone = true;
+			HandlePickup();
+		}
+	}
+	
+	void OnTriggerExit(Collider other)
+	{
+		if (other.tag == "Pickup")
+		{
+			m_bInPickupZone = false;
+		}
+	}
+	
+	private void HandlePickup()
+	{
+		GetAmmo();
+		
+		if (m_bCanPickUp)
+		{
+			m_bCanPickUp = false;
+			Transform m_closestGun = FindClosestGun();
+			if (m_closestGun)
 			{
-				Camera m_mainCamera = GetComponentInChildren<Camera>();
-				m_ray = m_mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0.0f));
-				RaycastHit m_rayHit = new RaycastHit();
-				Physics.Raycast (m_ray, out m_rayHit, 100);
-				if (m_rayHit.collider.tag == "Pistol" || m_rayHit.collider.tag == "Shotgun" || m_rayHit.collider.tag == "Rifle" || m_rayHit.collider.tag == "Sniper")
+				GunProperties.Gun m_eTempGun = m_closestGun.GetComponent<GunProperties>().GetGunType();
+				Gun m_eOtherGun;
+				if (m_eTempGun == GunProperties.Gun.Pistol)
+					m_eOtherGun = Gun.Pistol;
+				else if (m_eTempGun == GunProperties.Gun.Shotgun)
+					m_eOtherGun = Gun.Shotgun;
+				else if (m_eTempGun == GunProperties.Gun.Rifle)
+					m_eOtherGun = Gun.Rifle;
+				else
+					m_eOtherGun = Gun.Sniper;
+				
+				if (m_currentGun == Slot.Gun1)
 				{
-					m_pistolPrefab.SetActive (false);
-					m_shotgunPrefab.SetActive(false);
-					m_riflePrefab.SetActive(false);
-					m_sniperPrefab.SetActive(false);
-					
-					if (m_rayHit.collider.tag == "Pistol")
+					if (m_eSecondary == Gun.None)
 					{
-						m_pistolPrefab.SetActive(true);
-						
-						if (m_currentGun == Slot.Primary && m_secondary == Gun.None)
-						{
-							other.GetComponent<WeaponSpawner>().RemoveSpawner();
-							m_currentGun = Slot.Secondary;
-							m_secondary = Gun.Pistol;
-						}
-						else if (m_currentGun == Slot.Primary)
-						{
-							if (m_primary != Gun.Pistol)
-							{
-								if (m_primary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_primary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								else if (m_primary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_primary = Gun.Pistol;
-							}
-						}
-						else
-						{
-							if (m_secondary != Gun.Pistol)
-							{
-								if (m_secondary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_secondary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								else if (m_secondary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_secondary = Gun.Pistol;
-							}
-						}
+						// we aren't carrying a secondary weapon, so switch to second gun, pick it up
+						m_currentGun = Slot.Gun2;
+						m_eSecondary = m_eOtherGun;
+						PickUpGunSpecial(m_closestGun.gameObject);
 					}
-					if (m_rayHit.collider.tag == "Shotgun")
+					else
 					{
-						m_shotgunPrefab.SetActive(true);
-						
-						if (m_currentGun == Slot.Primary && m_secondary == Gun.None)
-						{
-							other.GetComponent<WeaponSpawner>().RemoveSpawner();
-							m_currentGun = Slot.Secondary;
-							m_secondary = Gun.Shotgun;
-						}
-						else if (m_currentGun == Slot.Primary)
-						{
-							if (m_primary != Gun.Shotgun)
-							{
-								if (m_primary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								else if (m_primary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								else if (m_primary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_primary = Gun.Shotgun;
-							}
-						}
-						else
-						{
-							if (m_secondary != Gun.Shotgun)
-							{
-								if (m_secondary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								else if (m_secondary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								else if (m_secondary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_secondary = Gun.Shotgun;
-							}
-						}
-					}
-					if (m_rayHit.collider.tag == "Rifle")
-					{
-						m_riflePrefab.SetActive(true);
-						
-						if (m_currentGun == Slot.Primary && m_secondary == Gun.None)
-						{
-							other.GetComponent<WeaponSpawner>().RemoveSpawner();
-							m_currentGun = Slot.Secondary;
-							m_secondary = Gun.Rifle;
-						}
-						else if (m_currentGun == Slot.Primary)
-						{
-							if (m_primary != Gun.Rifle)
-							{
-								if (m_primary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								else if (m_primary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_primary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_primary = Gun.Rifle;
-							}
-						}
-						else
-						{
-							if (m_secondary != Gun.Pistol)
-							{
-								if (m_secondary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								else if (m_secondary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_secondary == Gun.Sniper)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Sniper);
-								}
-								
-								m_secondary = Gun.Rifle;
-							}
-						}
-					}
-					if (m_rayHit.collider.tag == "Sniper")
-					{
-						m_sniperPrefab.SetActive(true);
-						
-						if (m_currentGun == Slot.Primary && m_secondary == Gun.None)
-						{
-							other.GetComponent<WeaponSpawner>().RemoveSpawner();
-							m_currentGun = Slot.Secondary;
-							m_secondary = Gun.Sniper;
-						}
-						else if (m_currentGun == Slot.Primary)
-						{
-							if (m_primary != Gun.Sniper)
-							{
-								if (m_primary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_primary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								else if (m_primary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								
-								m_primary = Gun.Sniper;
-							}
-						}
-						else
-						{
-							if (m_secondary != Gun.Sniper)
-							{
-								if (m_secondary == Gun.Pistol)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Pistol);
-								}
-								else if (m_secondary == Gun.Shotgun)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Shotgun);
-								}
-								else if (m_secondary == Gun.Rifle)
-								{
-									other.GetComponent<WeaponSpawner>().ChangeWeapon(WeaponSpawner.Gun.Rifle);
-								}
-								
-								m_secondary = Gun.Sniper;
-							}
-						}
+						// we're going to swap the gun in our hands with the gun on the ground
+						DropGun(m_ePrimary);
+						m_ePrimary = m_eOtherGun;
+						PickUpGun(m_closestGun.gameObject);
 					}
 				}
-				
+				else
+				{
+					DropGun(m_eSecondary);
+					m_eSecondary = m_eOtherGun;
+					PickUpGun(m_closestGun.gameObject);
+				}
+				// tell the weapon spawner that we've taken the gun
+				m_closestGun.GetComponent<GunProperties>().GunPickupTaken();
 			}
 		}
 	}
 	
-	void OnDrawGizmos()
+	// NOTE: This function is deprecated. Use SetRemoteWeaponSwitch() instead.
+	public void SetRemoteWeaponSwitch(Slot input)
 	{
-		Gizmos.color = Color.red;
-		Gizmos.DrawRay(m_ray);
+		m_currentGun = input;
+	}
+	
+	public void SetRemoteWeaponSwitch()
+	{
+		SwitchWeapon();
+	}
+	
+	private void FirstGun(Gun input)
+	{
+		if (input == Gun.Pistol)
+			m_heldGun = (GameObject)Instantiate(Resources.Load ("Pistol"));
+		else if (input == Gun.Shotgun)
+			m_heldGun = (GameObject)Instantiate(Resources.Load ("Shotgun"));
+		else if (input == Gun.Rifle)
+			m_heldGun = (GameObject)Instantiate(Resources.Load ("Rifle"));
+		else
+			m_heldGun = (GameObject)Instantiate(Resources.Load ("Sniper"));
+			
+		m_heldGun.GetComponent<GunProperties>().MaxAmmo();
+		m_heldGun.GetComponent<AmmoManager>().MaxAmmo();
+		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
+		m_heldGun.transform.localPosition = Vector3.zero;
+		m_heldGun.transform.localEulerAngles = Vector3.zero;
+		m_heldGun.GetComponentInChildren<GunProperties>().SetBulletSocket(m_heldGun.transform.parent.transform.Find("BulletSocket").gameObject);
+	}
+	
+	private void DropGun(Gun input)
+	{
+		GameObject m_droppedGun;
+		if (input == Gun.Pistol)
+			m_droppedGun = (GameObject) Instantiate(Resources.Load("PickupPistol"), transform.position, transform.rotation);
+		else if (input == Gun.Shotgun)
+			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
+		else if (input == Gun.Rifle)
+			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+		else
+			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
+		m_droppedGun.GetComponent<GunProperties>().SetAmmo(m_heldGun.GetComponent<GunProperties>().GetAmmo());
+		m_droppedGun.GetComponent<AmmoManager>().SetAmmo(m_heldGun.GetComponent<AmmoManager>().GetAmmo());
+	}
+	
+	private void PickUpGun(GameObject m_input)
+	{
+		// we need to replace the values for the current gun with this gun
+		if (m_currentGun == Slot.Gun1)
+		{
+			Destroy (m_heldGun);
+			if (m_ePrimary == Gun.Pistol)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
+			else if (m_ePrimary == Gun.Shotgun)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
+			else if (m_ePrimary == Gun.Rifle)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
+			else
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
+			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
+			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+		}
+		else
+		{
+			Destroy (m_heldGun);
+			if (m_eSecondary == Gun.Pistol)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
+			else if (m_eSecondary == Gun.Shotgun)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
+			else if (m_eSecondary == Gun.Rifle)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
+			else
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
+			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
+			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+		}
+		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
+		m_heldGun.transform.localPosition = Vector3.zero;
+		m_heldGun.transform.localEulerAngles = Vector3.zero;
+		m_heldGun.GetComponentInChildren<GunProperties>().SetBulletSocket(m_heldGun.transform.parent.transform.Find("BulletSocket").gameObject);
+	}
+	
+	private void PickUpGunSpecial(GameObject m_input)
+	{
+		// this is a special case just for when the player doesn't have two weapons yet, so he must only have a primary
+		m_iPrimaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
+		m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+		
+		Destroy (m_heldGun);
+		
+		if (m_eSecondary == Gun.Pistol)
+			m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
+		else if (m_eSecondary == Gun.Shotgun)
+			m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
+		else if (m_eSecondary == Gun.Rifle)
+			m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
+		else
+			m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
+		m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
+		m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
+		m_heldGun.transform.localPosition = Vector3.zero;
+		m_heldGun.transform.localEulerAngles = Vector3.zero;
+		m_heldGun.GetComponentInChildren<GunProperties>().SetBulletSocket(m_heldGun.transform.parent.transform.Find("BulletSocket").gameObject);
+	}
+	
+	private void SwitchGun()
+	{
+		// this function is designed for switching between the two guns on the character, all info is known on the object
+		if (m_currentGun == Slot.Gun1)
+		{
+			m_iSecondaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
+			m_iSecondaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+		}
+		else
+		{
+			m_iPrimaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
+			m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+		}
+		
+		Destroy (m_heldGun);
+		
+		if (m_currentGun == Slot.Gun1)
+		{
+			if (m_ePrimary == Gun.Pistol)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
+			else if (m_ePrimary == Gun.Shotgun)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
+			else if (m_ePrimary == Gun.Rifle)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
+			else
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
+			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_iPrimaryAmmo);
+			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_iPrimaryReserveAmmo);
+		}
+		else
+		{
+			if (m_eSecondary == Gun.Pistol)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
+			else if (m_eSecondary == Gun.Shotgun)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
+			else if (m_eSecondary == Gun.Rifle)
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
+			else
+				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
+			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_iSecondaryAmmo);
+			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_iSecondaryReserveAmmo);
+		}
+		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
+		m_heldGun.transform.localPosition = Vector3.zero;
+		m_heldGun.transform.localEulerAngles = Vector3.zero;
+		m_heldGun.GetComponentInChildren<GunProperties>().SetBulletSocket(m_heldGun.transform.parent.transform.Find("BulletSocket").gameObject);
+	}
+	
+	private Transform FindClosestGun()
+	{
+		// this function is for finding the closest valid gun to pick up
+		// we need to do two things: get a list of closeby guns that ARE NOT currently in the player inventory, then find out which gun in the list is closest
+		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 3.2f, LayerMask.GetMask("PickupLayer"));
+		// 3.2 is a size based on the current size of the Pickup colliders as of 9-4-14
+		m_availablePickups.Clear();
+		Gun m_eOtherGun;
+		foreach (Collider weapon in m_pickupColliders)
+		{
+			GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+			if (m_eTempGun == GunProperties.Gun.Pistol)
+				m_eOtherGun = Gun.Pistol;
+			else if (m_eTempGun == GunProperties.Gun.Shotgun)
+				m_eOtherGun = Gun.Shotgun;
+			else if (m_eTempGun == GunProperties.Gun.Rifle)
+				m_eOtherGun = Gun.Rifle;
+			else
+				m_eOtherGun = Gun.Sniper;
+			
+			if (!(m_eOtherGun == Gun.Pistol && m_ePrimary == Gun.Pistol) &&
+			    !(m_eOtherGun == Gun.Pistol && m_eSecondary == Gun.Pistol) &&
+			    !(m_eOtherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun) &&
+			    !(m_eOtherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun) &&
+			    !(m_eOtherGun == Gun.Rifle && m_ePrimary == Gun.Rifle) &&
+			    !(m_eOtherGun == Gun.Rifle && m_eSecondary == Gun.Rifle) &&
+			    !(m_eOtherGun == Gun.Sniper && m_ePrimary == Gun.Sniper) &&
+			    !(m_eOtherGun == Gun.Sniper && m_eSecondary == Gun.Sniper))
+			{
+				// this is a gun that is not in our inventory, so it can potentially be picked up, add it to the list
+				m_availablePickups.Add(weapon);
+			}
+		}	
+		
+		if (m_availablePickups.Count > 0)
+		{
+			// with this list, we need to find out which gun is the closest to the player
+			Collider m_closestPickup = m_availablePickups[0];
+			float m_fShortestDistance = Vector3.Distance(transform.position, m_closestPickup.transform.position);
+			
+			foreach (Collider weapon in m_availablePickups)
+			{
+				if (Vector3.Distance(transform.position, weapon.transform.position) < m_fShortestDistance)
+					m_closestPickup = weapon;
+			}
+			return m_closestPickup.transform.parent;
+		}
+		return null;
+	}
+	
+	private void GetAmmo()
+	{
+		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("PickupLayer"));
+		Gun m_eOtherGun;
+		foreach (Collider weapon in m_pickupColliders)
+		{
+			GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+			if (m_eTempGun == GunProperties.Gun.Pistol)
+				m_eOtherGun = Gun.Pistol;
+			else if (m_eTempGun == GunProperties.Gun.Shotgun)
+				m_eOtherGun = Gun.Shotgun;
+			else if (m_eTempGun == GunProperties.Gun.Rifle)
+				m_eOtherGun = Gun.Rifle;
+			else
+				m_eOtherGun = Gun.Sniper;
+			
+			if (m_eOtherGun == Gun.Pistol && m_ePrimary == Gun.Pistol ||
+			    m_eOtherGun == Gun.Pistol && m_eSecondary == Gun.Pistol ||
+			    m_eOtherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun ||
+			    m_eOtherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun ||
+			    m_eOtherGun == Gun.Rifle && m_ePrimary == Gun.Rifle ||
+			    m_eOtherGun == Gun.Rifle && m_eSecondary == Gun.Rifle ||
+			    m_eOtherGun == Gun.Sniper && m_ePrimary == Gun.Sniper ||
+			    m_eOtherGun == Gun.Sniper && m_eSecondary == Gun.Sniper)
+			{
+				// the player is currently already carring that weapon, which means they can get ammo
+				// get ammo from the pickup
+				GetComponentInChildren<AmmoManager>().FillUpAmmo(weapon.transform.parent.GetComponentInParent<AmmoManager>());
+			}
+		}
 	}
 }
