@@ -2,7 +2,11 @@
 
 Daily Log
 
-9/6/14	add: My Daily Log.txt
+9/6/14
+	No changes.
+
+9/5/14	
+	add: My Daily Log.txt
 	add: Fuckin' tons, yo
 	add: Weapon prefabs and Weapon Pickup prefabs
 	add: AmmoManager script, holds ammo for gun
