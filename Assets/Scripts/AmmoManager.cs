@@ -7,8 +7,8 @@ public class AmmoManager : MonoBehaviour
 	private int m_iMaxAmmoShotgun = 100;
 	private int m_iMaxAmmoRifle = 100;
 	private int m_iMaxAmmoSniper = 100;
-	
 	public int m_iAmmo = 0;
+	
 	// Use this for initialization
 	void Start () 
 	{
@@ -18,7 +18,7 @@ public class AmmoManager : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		if (GetComponent<GunProperties>().GetWeaponSpawner() &&
+		if (GetComponent<GunProperties>().GetItemSpawner() &&
 			m_iAmmo <= 0)
 			GetComponent<GunProperties>().GunPickupTaken();
 	}
@@ -47,15 +47,15 @@ public class AmmoManager : MonoBehaviour
 	
 	public void FillUpAmmo(AmmoManager otherAmmo)
 	{
-		int m_iAmmoNeeded;
+		int ammoNeeded;
 		if (tag == "Pistol" && otherAmmo.tag == "Pistol")
 		{
-			m_iAmmoNeeded = m_iMaxAmmoPistol - m_iAmmo;
+			ammoNeeded = m_iMaxAmmoPistol - m_iAmmo;
 			
-			if (otherAmmo.GetAmmo() >= m_iAmmoNeeded)
+			if (otherAmmo.GetAmmo() >= ammoNeeded)
 			{
-				m_iAmmo += m_iAmmoNeeded;
-				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - m_iAmmoNeeded);
+				m_iAmmo += ammoNeeded;
+				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - ammoNeeded);
 			}
 			else
 			{
@@ -65,12 +65,12 @@ public class AmmoManager : MonoBehaviour
 		}
 		else if (tag == "Shotgun" && otherAmmo.tag == "Shotgun")
 		{
-			m_iAmmoNeeded = m_iMaxAmmoRifle - m_iAmmo;
+			ammoNeeded = m_iMaxAmmoRifle - m_iAmmo;
 			
-			if (otherAmmo.GetAmmo() >= m_iAmmoNeeded)
+			if (otherAmmo.GetAmmo() >= ammoNeeded)
 			{
-				m_iAmmo += m_iAmmoNeeded;
-				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - m_iAmmoNeeded);
+				m_iAmmo += ammoNeeded;
+				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - ammoNeeded);
 			}
 			else
 			{
@@ -80,12 +80,12 @@ public class AmmoManager : MonoBehaviour
 		}
 		else if (tag == "Rifle" && otherAmmo.tag == "Rifle")
 		{
-			m_iAmmoNeeded = m_iMaxAmmoRifle - m_iAmmo;
+			ammoNeeded = m_iMaxAmmoRifle - m_iAmmo;
 			
-			if (otherAmmo.GetAmmo() >= m_iAmmoNeeded)
+			if (otherAmmo.GetAmmo() >= ammoNeeded)
 			{
-				m_iAmmo += m_iAmmoNeeded;
-				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - m_iAmmoNeeded);
+				m_iAmmo += ammoNeeded;
+				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - ammoNeeded);
 			}
 			else
 			{
@@ -95,12 +95,12 @@ public class AmmoManager : MonoBehaviour
 		}
 		else if (tag == "Sniper" && otherAmmo.tag == "Sniper")
 		{
-			m_iAmmoNeeded = m_iMaxAmmoSniper - m_iAmmo;
+			ammoNeeded = m_iMaxAmmoSniper - m_iAmmo;
 			
-			if (otherAmmo.GetAmmo() >= m_iAmmoNeeded)
+			if (otherAmmo.GetAmmo() >= ammoNeeded)
 			{
-				m_iAmmo += m_iAmmoNeeded;
-				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - m_iAmmoNeeded);
+				m_iAmmo += ammoNeeded;
+				otherAmmo.SetAmmo(otherAmmo.GetAmmo() - ammoNeeded);
 			}
 			else
 			{

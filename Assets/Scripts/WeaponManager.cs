@@ -103,19 +103,19 @@ public class WeaponManager : MonoBehaviour
 		if (m_bCanPickUp)
 		{
 			m_bCanPickUp = false;
-			Transform m_closestGun = FindClosestGun();
-			if (m_closestGun)
+			Transform closestGun = FindClosestGun();
+			if (closestGun)
 			{
-				GunProperties.Gun m_eTempGun = m_closestGun.GetComponent<GunProperties>().GetGunType();
-				Gun m_eOtherGun;
+				GunProperties.Gun m_eTempGun = closestGun.GetComponent<GunProperties>().GetGunType();
+				Gun otherGun;
 				if (m_eTempGun == GunProperties.Gun.Pistol)
-					m_eOtherGun = Gun.Pistol;
+					otherGun = Gun.Pistol;
 				else if (m_eTempGun == GunProperties.Gun.Shotgun)
-					m_eOtherGun = Gun.Shotgun;
+					otherGun = Gun.Shotgun;
 				else if (m_eTempGun == GunProperties.Gun.Rifle)
-					m_eOtherGun = Gun.Rifle;
+					otherGun = Gun.Rifle;
 				else
-					m_eOtherGun = Gun.Sniper;
+					otherGun = Gun.Sniper;
 				
 				if (m_currentGun == Slot.Gun1)
 				{
@@ -123,30 +123,30 @@ public class WeaponManager : MonoBehaviour
 					{
 						// we aren't carrying a secondary weapon, so switch to second gun, pick it up
 						m_currentGun = Slot.Gun2;
-						m_eSecondary = m_eOtherGun;
-						PickUpGunSpecial(m_closestGun.gameObject);
+						m_eSecondary = otherGun;
+						PickUpGunSpecial(closestGun.gameObject);
 					}
 					else
 					{
 						// we're going to swap the gun in our hands with the gun on the ground
 						DropGun(m_ePrimary);
-						m_ePrimary = m_eOtherGun;
-						PickUpGun(m_closestGun.gameObject);
+						m_ePrimary = otherGun;
+						PickUpGun(closestGun.gameObject);
 					}
 				}
 				else
 				{
 					DropGun(m_eSecondary);
-					m_eSecondary = m_eOtherGun;
-					PickUpGun(m_closestGun.gameObject);
+					m_eSecondary = otherGun;
+					PickUpGun(closestGun.gameObject);
 				}
 				// tell the weapon spawner that we've taken the gun
-				m_closestGun.GetComponent<GunProperties>().GunPickupTaken();
+				closestGun.GetComponent<GunProperties>().GunPickupTaken();
 			}
 		}
 	}
 	
-	// NOTE: This function is deprecated. Use SetRemoteWeaponSwitch() instead.
+	// NOTE: This function is deprecated, does not do intendend behavior anymore. Use SetRemoteWeaponSwitch() instead.
 	public void SetRemoteWeaponSwitch(Slot input)
 	{
 		m_currentGun = input;
@@ -178,17 +178,19 @@ public class WeaponManager : MonoBehaviour
 	
 	private void DropGun(Gun input)
 	{
-		GameObject m_droppedGun;
+		GameObject droppedGun;
 		if (input == Gun.Pistol)
-			m_droppedGun = (GameObject) Instantiate(Resources.Load("PickupPistol"), transform.position, transform.rotation);
+			droppedGun = (GameObject) Instantiate(Resources.Load("PickupPistol"), transform.position, transform.rotation);
 		else if (input == Gun.Shotgun)
-			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
+			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
 		else if (input == Gun.Rifle)
-			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+		else if (input == Gun.Sniper)
+			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
 		else
-			m_droppedGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
-		m_droppedGun.GetComponent<GunProperties>().SetAmmo(m_heldGun.GetComponent<GunProperties>().GetAmmo());
-		m_droppedGun.GetComponent<AmmoManager>().SetAmmo(m_heldGun.GetComponent<AmmoManager>().GetAmmo());
+			droppedGun = null;
+		droppedGun.GetComponent<GunProperties>().SetAmmo(m_heldGun.GetComponent<GunProperties>().GetAmmo());
+		droppedGun.GetComponent<AmmoManager>().SetAmmo(m_heldGun.GetComponent<AmmoManager>().GetAmmo());
 	}
 	
 	private void PickUpGun(GameObject m_input)
@@ -307,27 +309,27 @@ public class WeaponManager : MonoBehaviour
 		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 3.2f, LayerMask.GetMask("PickupLayer"));
 		// 3.2 is a size based on the current size of the Pickup colliders as of 9-4-14
 		m_availablePickups.Clear();
-		Gun m_eOtherGun;
+		Gun otherGun;
 		foreach (Collider weapon in m_pickupColliders)
 		{
 			GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
 			if (m_eTempGun == GunProperties.Gun.Pistol)
-				m_eOtherGun = Gun.Pistol;
+				otherGun = Gun.Pistol;
 			else if (m_eTempGun == GunProperties.Gun.Shotgun)
-				m_eOtherGun = Gun.Shotgun;
+				otherGun = Gun.Shotgun;
 			else if (m_eTempGun == GunProperties.Gun.Rifle)
-				m_eOtherGun = Gun.Rifle;
+				otherGun = Gun.Rifle;
 			else
-				m_eOtherGun = Gun.Sniper;
+				otherGun = Gun.Sniper;
 			
-			if (!(m_eOtherGun == Gun.Pistol && m_ePrimary == Gun.Pistol) &&
-			    !(m_eOtherGun == Gun.Pistol && m_eSecondary == Gun.Pistol) &&
-			    !(m_eOtherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun) &&
-			    !(m_eOtherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun) &&
-			    !(m_eOtherGun == Gun.Rifle && m_ePrimary == Gun.Rifle) &&
-			    !(m_eOtherGun == Gun.Rifle && m_eSecondary == Gun.Rifle) &&
-			    !(m_eOtherGun == Gun.Sniper && m_ePrimary == Gun.Sniper) &&
-			    !(m_eOtherGun == Gun.Sniper && m_eSecondary == Gun.Sniper))
+			if (!(otherGun == Gun.Pistol && m_ePrimary == Gun.Pistol) &&
+			    !(otherGun == Gun.Pistol && m_eSecondary == Gun.Pistol) &&
+			    !(otherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun) &&
+			    !(otherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun) &&
+			    !(otherGun == Gun.Rifle && m_ePrimary == Gun.Rifle) &&
+			    !(otherGun == Gun.Rifle && m_eSecondary == Gun.Rifle) &&
+			    !(otherGun == Gun.Sniper && m_ePrimary == Gun.Sniper) &&
+			    !(otherGun == Gun.Sniper && m_eSecondary == Gun.Sniper))
 			{
 				// this is a gun that is not in our inventory, so it can potentially be picked up, add it to the list
 				m_availablePickups.Add(weapon);
@@ -353,32 +355,37 @@ public class WeaponManager : MonoBehaviour
 	private void GetAmmo()
 	{
 		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("PickupLayer"));
-		Gun m_eOtherGun;
+		Gun otherGun;
 		foreach (Collider weapon in m_pickupColliders)
 		{
 			GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
 			if (m_eTempGun == GunProperties.Gun.Pistol)
-				m_eOtherGun = Gun.Pistol;
+				otherGun = Gun.Pistol;
 			else if (m_eTempGun == GunProperties.Gun.Shotgun)
-				m_eOtherGun = Gun.Shotgun;
+				otherGun = Gun.Shotgun;
 			else if (m_eTempGun == GunProperties.Gun.Rifle)
-				m_eOtherGun = Gun.Rifle;
+				otherGun = Gun.Rifle;
 			else
-				m_eOtherGun = Gun.Sniper;
+				otherGun = Gun.Sniper;
 			
-			if (m_eOtherGun == Gun.Pistol && m_ePrimary == Gun.Pistol ||
-			    m_eOtherGun == Gun.Pistol && m_eSecondary == Gun.Pistol ||
-			    m_eOtherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun ||
-			    m_eOtherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun ||
-			    m_eOtherGun == Gun.Rifle && m_ePrimary == Gun.Rifle ||
-			    m_eOtherGun == Gun.Rifle && m_eSecondary == Gun.Rifle ||
-			    m_eOtherGun == Gun.Sniper && m_ePrimary == Gun.Sniper ||
-			    m_eOtherGun == Gun.Sniper && m_eSecondary == Gun.Sniper)
+			if (otherGun == Gun.Pistol && m_ePrimary == Gun.Pistol ||
+			    otherGun == Gun.Pistol && m_eSecondary == Gun.Pistol ||
+			    otherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun ||
+			    otherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun ||
+			    otherGun == Gun.Rifle && m_ePrimary == Gun.Rifle ||
+			    otherGun == Gun.Rifle && m_eSecondary == Gun.Rifle ||
+			    otherGun == Gun.Sniper && m_ePrimary == Gun.Sniper ||
+			    otherGun == Gun.Sniper && m_eSecondary == Gun.Sniper)
 			{
 				// the player is currently already carring that weapon, which means they can get ammo
 				// get ammo from the pickup
 				GetComponentInChildren<AmmoManager>().FillUpAmmo(weapon.transform.parent.GetComponentInParent<AmmoManager>());
 			}
 		}
+	}
+	
+	public void SetGunActive(bool input)
+	{
+		m_heldGun.SetActive(input);
 	}
 }

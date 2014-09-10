@@ -51,27 +51,27 @@ public class WeaponSpawner : MonoBehaviour
 	
 	private void SpawnGun()
 	{
-		GameObject m_newGun;
+		GameObject newGun;
 		
 		if (m_eGun == Gun.Pistol)
 		{
-			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupPistol"), transform.position, transform.rotation);
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupPistol"), transform.position, transform.rotation);
 		}
 		else if (m_eGun == Gun.Shotgun)
 		{
-			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
 		}
 		else if (m_eGun == Gun.Rifle)
 		{
-			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
 		}
 		else
 		{
-			m_newGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
 		}
-		m_newGun.GetComponent<AmmoManager>().MaxAmmo();
-		m_newGun.GetComponent<GunProperties>().SetWeaponSpawner(gameObject);
-		m_newGun.GetComponent<GunProperties>().MaxAmmo();
+		newGun.GetComponent<AmmoManager>().MaxAmmo();
+		newGun.GetComponent<GunProperties>().SetItemSpawner(gameObject);
+		newGun.GetComponent<GunProperties>().MaxAmmo();
 	}
 	
 	public void ChangeWeapon(Gun input)

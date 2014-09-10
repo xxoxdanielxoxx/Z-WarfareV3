@@ -1,6 +1,17 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+09/09/14
+	add: Medkit script
+	chg: Health script modification
+	Medkit is now implemented, health script added to player controller.
+	IMPORTANT
+	Medkit pickup destroys itself upon pickup, probably going to need to be changed. Medkit heal action
+	just turns off the gun because I was thinking it would just play a "healing health kit" animation and
+	wouldn't need a health kit model "childed" to the player controller.
+
+09/08/14
+	No changes.
 
 09/07/14 
 	No changes.

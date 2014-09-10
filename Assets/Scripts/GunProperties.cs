@@ -21,7 +21,7 @@ public class GunProperties : MonoBehaviour
 	private float m_fFireRateTimer;
 	public float m_fBulletSpeed = 4.0f;
 	public int m_iDamage = 10;
-	private GameObject m_WeaponSpawner;
+	public GameObject m_ItemSpawner;
 	public int m_iAmmo = 0;
 	public int m_iMagSize = 20;
 	private int m_iMaxPistol = 17;
@@ -63,6 +63,7 @@ public class GunProperties : MonoBehaviour
 		if (Input.GetKeyDown (KeyCode.R))
 			if (!m_bReloading)
 				StartCoroutine(Reload());
+		// just realized that this can cause pickups on the ground to "reload", but doesn't matter as the gun is destroyed and a new one is instantiated
 	}
 	
 	public void Shoot()
@@ -167,20 +168,22 @@ public class GunProperties : MonoBehaviour
 		m_bulletSocket = input;
 	}
 	
-	public void SetWeaponSpawner(GameObject input)
+	public void SetItemSpawner(GameObject input)
 	{
-		m_WeaponSpawner = input;
+		m_ItemSpawner = input;
 	}
 	
-	public GameObject GetWeaponSpawner()
+	public GameObject GetItemSpawner()
 	{
-		return m_WeaponSpawner;
+		return m_ItemSpawner;
 	}
 	
 	public void GunPickupTaken()
 	{
-		if (m_WeaponSpawner)
-			m_WeaponSpawner.GetComponent<WeaponSpawner>().GunTaken();
+		if (m_ItemSpawner)
+		{
+			m_ItemSpawner.GetComponent<ItemSpawner>().ItemTaken();
+		}
 		Destroy (gameObject);
 	}
 }
