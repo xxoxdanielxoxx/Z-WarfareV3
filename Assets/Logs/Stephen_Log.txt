@@ -1,6 +1,12 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+09/11/14
+	No changes.
+
+09/10/14
+	No changes.
+
 09/09/14
 	add: Medkit script
 	chg: Health script modification
