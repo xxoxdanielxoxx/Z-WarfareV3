@@ -124,7 +124,6 @@ public class AIMaster : MonoBehaviour
 
 	public void CreateNewGroup()
 	{
-		Debug.Log("Pew!");
 		m_Groups.Add((GroupAI)ScriptableObject.CreateInstance("GroupAI"));
 		
 		++m_iGroupCount;
@@ -222,7 +221,7 @@ public class AIMaster : MonoBehaviour
 				m_SpawnNow = true;
 				m_iZombieWaveLimit = wave*10;
 				m_iZombiesLeft = m_iZombieWaveLimit;
-				m_iActiveZombies = -1;
+				m_iActiveZombies = 0;
 			}
 		}
 
