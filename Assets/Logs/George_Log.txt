@@ -11,5 +11,16 @@ Daily Log
 |												|
 |9/7/14  N/A											|		
 -------------------------------------------------------------------------------------------------
+9/13/14		add:Network zombie spawner
+	  	chg: Comment out Debuglogs  pew, life pick up
+		chg: press Esc to to show and hide mouse
+		add: my own network Test Scene
+		chg: Scene 2, its no longer bound to any network code
+		Notes
+		There are some RUN errors in My Netork scene Zombie Spawns are not in sync. with Host to client.
+		Allocation IDS are cuasing some Proble,s
+		NEED TO send Shooting logic to all the players
+		
+
 
 9/8/14   add: My Daily Log.txt

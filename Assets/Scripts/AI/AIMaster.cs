@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -73,8 +73,10 @@ public class AIMaster : MonoBehaviour
 	/// <summary>
 	/// Awake this instance. Initialize any internal varible that I will need to track
 	/// </summary>
-	void Awake()
+	void Start()
 	{
+
+
 		m_SpawnNow = true;
 		m_fSpawnCD = m_fSpawnDownTime;
 
@@ -124,7 +126,7 @@ public class AIMaster : MonoBehaviour
 
 	public void CreateNewGroup()
 	{
-		Debug.Log("Pew!");
+		//Debug.Log("Pew!");
 		m_Groups.Add((GroupAI)ScriptableObject.CreateInstance("GroupAI"));
 		
 		++m_iGroupCount;

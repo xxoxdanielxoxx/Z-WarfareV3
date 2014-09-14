@@ -86,7 +86,7 @@ public class Medkit : MonoBehaviour
 	public void MedkitTaken()
 	{
 		m_ItemSpawner.GetComponent<ItemSpawner>().ItemTaken();
-		Debug.Log ("Medkit picked up");
+		//Debug.Log ("Medkit picked up");
 		// IMPORTANT George probably wants this to be handled differently to ensure networking sync between clients ------------
 		Destroy (gameObject);
 	}

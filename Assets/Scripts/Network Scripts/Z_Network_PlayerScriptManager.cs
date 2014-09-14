@@ -13,7 +13,7 @@ public class Z_Network_PlayerScriptManager : Photon.MonoBehaviour
 		if (photonView.isMine)
 		{
 			Z_Network_RigidBody RB = GetComponent<Z_Network_RigidBody>()as Z_Network_RigidBody ;
-			RB.enabled = false;
+			//RB.enabled = false;
 
 			Destroy(GameObject.Find("LevelCamera"));
 			
@@ -28,7 +28,7 @@ public class Z_Network_PlayerScriptManager : Photon.MonoBehaviour
 			//////TURN OFF
 
 			//Turn off Camera
-			transform.FindChild("playerCamera").gameObject.active = false;
+			transform.FindChild("Main Camera").gameObject.active = false;
 			
 			//Turn off input
 			FPSInputController input = GetComponent<FPSInputController>() as FPSInputController;

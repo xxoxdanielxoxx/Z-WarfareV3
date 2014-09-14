@@ -1,7 +1,7 @@
-﻿#define offline 
+﻿//#define offline 
 using UnityEngine;
 using System.Collections;
-
+using System.Collections.Generic;
 public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour 
 {
 
@@ -50,7 +50,7 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 		//Turn off scripts if we are the Clients
 		if (m_bIsHost) 
 		{
-			m_NetRigidBody.enabled = false;
+			//m_NetRigidBody.enabled = false;
 			m_ZombieStateMachine.m_bIsHost = true;
 			//photonView
 		} 
@@ -64,10 +64,16 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 			m_ZombieStateMachine.m_bIsHost = false;
 
 		}
+
+
 	}
 
 	void BroadcastStates()
 	{
+	  	//If true we are a single player game and no reason to broadcast 
+		if (PhotonNetwork.playerList.Length < 2)
+			return;
+
 		if (m_bIsHost) 
 		{
 			//If we changed states, Broad cast this to the clients

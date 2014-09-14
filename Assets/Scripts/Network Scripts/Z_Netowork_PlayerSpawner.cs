@@ -48,18 +48,26 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 	{
 		//if (PhotonNetwork.isNonMasterClientInRoom)
 		//{
+
+
 			
 #if auth
 			//Ask the MC to spawn a User for him. give him your PhotonView
 			photonView.RPC("SpawnLocalPlayer",PhotonTargets.MasterClient, PhotonNetwork.player );
 
-			
 
 #else
 			yield return new WaitForSeconds(5);
 			//SpawnLocalPlayer();  
 #endif	
 		//}
+
+
+		if (PhotonNetwork.isMasterClient) 
+		{
+			Z_Network_ZombieSpawner.Get().SendMessage ("SummonRemoteZombies", SendMessageOptions.DontRequireReceiver);
+		}
+
 	}
 	
 	//////////////////////////////
@@ -68,7 +76,7 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 	[RPC]
 	void AddPlayer(PhotonPlayer networkPlayer)
 	{
-		Debug.Log("AddPlayer " + networkPlayer );
+		Debug.Log("Player Loaded " + networkPlayer );
 		if (GetPlayer(networkPlayer) != null)
 		{
 			Debug.LogError("AddPlayer: Player already exists!");
@@ -113,12 +121,11 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 	}
 	
 	////////////////////////////
-	// STARTUP: Spawn own player
+	// STARTUP: Spawn own player, Message is sent from the host to all the clients, inlcuding himself
 	[RPC ]
 	void SpawnLocalPlayer()
 	{
-		Debug.Log("Function 2 ");
-		
+
 		//Get random spawnpoint
 		GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("playerSpawn");
 		GameObject theGO = spawnPoints[Random.Range(0, spawnPoints.Length)];
@@ -131,27 +138,6 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 		photonView.RPC("AddPlayer", PhotonTargets.AllBuffered, PhotonNetwork.player);
 		photonView.RPC("SpawnOnNetwork", PhotonTargets.AllBuffered, pos, rot, id1, PhotonNetwork.player);
 	}
-
-	void SpawnLocalPlayer(PhotonPlayer newPlayer)
-	{
-		//Called on the MasterClient only
-		Debug.Log("Function 2  ");
-	
-		//Get random spawnpoint
-		GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("playerSpawn");
-		GameObject theGO = spawnPoints[Random.Range(0, spawnPoints.Length)];
-		Vector3 pos = theGO.transform.position;
-		Quaternion rot = theGO.transform.rotation;
-
-		Transform myNewTrans = PhotonNetwork.Instantiate(playerPrefab.name, pos, rot, 0).transform;
-
-		//Manually allocate PhotonViewID
-		int id1 = PhotonNetwork.AllocateViewID();
-
-		photonView.RPC("AddPlayer", PhotonTargets.AllBuffered, newPlayer);
-		photonView.RPC("SpawnOnNetwork", PhotonTargets.AllBuffered, pos, rot, id1, newPlayer);
-	}
-	
 	
 	[RPC]
 	void SpawnOnNetwork(Vector3 pos, Quaternion rot, int id1, PhotonPlayer np)
@@ -168,10 +154,6 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 			localPlayerInfo = pNode;
 		}
 
-		//Disable Scripts
-		//Maybe call some specific action on the instantiated object?
-		//PLAYERSCRIPT tmp = newPlayer.GetComponent<PLAYERSCRIPT>();
-		//tmp.SetPlayer(pNode.networkPlayer);
 	}
 	
 	//When a PhotonView instantiates it has viewID=0 and is unusable.
@@ -200,8 +182,11 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
     void ReadyCheck()
 	{
 		m_iCountOfplayers++;
-		if (m_iCountOfplayers == PhotonNetwork.countOfPlayers)
-			 photonView.RPC ("SpawnLocalPlayer", PhotonTargets.AllBuffered);
+		if (m_iCountOfplayers == PhotonNetwork.countOfPlayers) 
+		{
+			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.AllBuffered);
+
+		}
 
 	}
 	
