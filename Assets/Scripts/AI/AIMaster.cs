@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -73,10 +73,8 @@ public class AIMaster : MonoBehaviour
 	/// <summary>
 	/// Awake this instance. Initialize any internal varible that I will need to track
 	/// </summary>
-	void Start()
+	void Awake()
 	{
-
-
 		m_SpawnNow = true;
 		m_fSpawnCD = m_fSpawnDownTime;
 
@@ -126,7 +124,6 @@ public class AIMaster : MonoBehaviour
 
 	public void CreateNewGroup()
 	{
-		//Debug.Log("Pew!");
 		m_Groups.Add((GroupAI)ScriptableObject.CreateInstance("GroupAI"));
 		
 		++m_iGroupCount;
@@ -224,7 +221,7 @@ public class AIMaster : MonoBehaviour
 				m_SpawnNow = true;
 				m_iZombieWaveLimit = wave*10;
 				m_iZombiesLeft = m_iZombieWaveLimit;
-				m_iActiveZombies = -1;
+				m_iActiveZombies = 0;
 			}
 		}
 
