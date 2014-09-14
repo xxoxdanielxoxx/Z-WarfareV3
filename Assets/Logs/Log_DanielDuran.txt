@@ -1,3 +1,7 @@
+9/13/14
+-------
+Pulled and merged new branc and made sure it at least opened...didn't really see if it runs. It looks fine though.
+
 9/12/14
 -------
 Sent email...
