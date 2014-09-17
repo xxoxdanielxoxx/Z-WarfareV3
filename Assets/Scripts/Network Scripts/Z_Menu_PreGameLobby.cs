@@ -202,6 +202,7 @@ public class Z_Menu_PreGameLobby : Photon.MonoBehaviour
 	void LaunchGame()
 	{
 		m_bLaunchingGame = true;
+		PhotonNetwork.LoadLevel((m_sGAMESCENE));
 	}
 
 	void LaunchingGameGUI()
@@ -216,7 +217,6 @@ public class Z_Menu_PreGameLobby : Photon.MonoBehaviour
 		if (Application.CanStreamedLevelBeLoaded(m_sGAMESCENE))
 		{
 			GUI.Label(new Rect(Screen.width / 4 + 200, Screen.height / 2 - 25, 285, 150), "Loaded, starting the game!");
-			PhotonNetwork.LoadLevel((m_sGAMESCENE));
 		}
 		else
 		{

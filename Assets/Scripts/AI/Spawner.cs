@@ -29,8 +29,13 @@ public class Spawner : MonoBehaviour
 	float	m_fGridResW;	// The width  of each cell in the grid. Make sure the player can fit in here!
 	float	m_fGridResH;	// The height of each cell in the grid. Make sure the player can fit in here!
 
-	void Awake()
+
+
+
+	public void Activate()
 	{
+
+
 		m_fGridResW = 1.2f;
 		m_fGridResH = 1.2f;
 

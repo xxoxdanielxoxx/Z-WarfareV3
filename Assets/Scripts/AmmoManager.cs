@@ -24,7 +24,7 @@ public class AmmoManager : MonoBehaviour
 	}
 	
 	public void SetAmmo(int input)
-	{
+	{  
 		m_iAmmo = input;
 	}
 	

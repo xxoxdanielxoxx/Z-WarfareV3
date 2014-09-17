@@ -12,11 +12,11 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 	{
 		s_ZS = this;
 
-		if (PhotonNetwork.isNonMasterClientInRoom) 
-		{
-			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-			m.enabled = false;
-		} 
+//		if (PhotonNetwork.isNonMasterClientInRoom) 
+//		{
+//			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
+//			m.enabled = false;
+//		} 
 	}
 
 	public static Z_Network_ZombieSpawner Get()
@@ -35,6 +35,11 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 		{
 			Debug.Log("Error AI MASTER's Zombies are NULL");
 			return ;		
+		}
+
+		if (photonView == null) {
+			Debug.Log("Offline / Or Photon View is not atached");
+				return;
 		}
 
 
@@ -57,6 +62,8 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 			Quaternion rot 	= zombies[i].transform.rotation;
 
 
+
+			Debug.Log("Player Count = " + PhotonNetwork.countOfPlayers);
 			if (PhotonNetwork.countOfPlayers <= 1) 
 			{
 				Debug.Log("Single Player ");
@@ -65,17 +72,23 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 
 			//Transmit the Clients the ID, and have them Spawn the Zombies
 			//NOTE ADD TYPE
+			Debug.Log("Sending RPC ");
 			photonView.RPC("SpawnRemoteZombiesNetwork", PhotonTargets.OthersBuffered, pos, rot, id1);
 		}
 	}
 
 	[RPC]
-	void SpawnRemoteZombiesNetwork(Vector3 pos, Quaternion rot, int id1)
+	public void SpawnRemoteZombiesNetwork(Vector3 pos, Quaternion rot, int id1)
 	{
+		Debug.Log("Clients call to spawn Zombies, ID = " + id1);
+
 		Transform remoteZombie = Instantiate(m_RegZombiePrefab, pos, rot) as Transform;
 
+		remoteZombie.GetComponent<PhotonView>().viewID = id1 ;
+
+
 		//Set photonview ID everywhere!
-		SetPhotonViewIDs(remoteZombie.gameObject, id1);
+		//SetPhotonViewIDs(remoteZombie.gameObject, id1);
 	
 	}
 

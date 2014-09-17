@@ -11,6 +11,16 @@ Daily Log
 |												|
 |9/7/14  N/A											|		
 -------------------------------------------------------------------------------------------------
+
+
+9/16/14		chng:AI Master has a 2 bools, OFFLINEMODE, and Is Active
+		AImaster WORKS however there are Wraps around awake for Networking purposes
+		add: OFFLINE mode is true by defualt for debuging purposes
+		AI master now activates all the Spwaners, no need to call in update.
+
+
+
+
 9/13/14		add:Network zombie spawner
 	  	chg: Comment out Debuglogs  pew, life pick up
 		chg: press Esc to to show and hide mouse

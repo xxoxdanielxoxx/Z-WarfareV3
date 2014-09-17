@@ -11,8 +11,12 @@ using System.Collections.Generic;
 /// Simply attach this script to any gameObject in the scene and it will take care of the rest.
 /// </summary>
 
-public class AIMaster : MonoBehaviour 
+public class AIMaster : Photon.MonoBehaviour 
 {
+	/// <summary>
+	/// IF it is Checked You are in DEBUG MODE and its NOT NETWORKED/// </summary>
+	public bool m_bOFFLINEMODE = true;
+	private bool m_bIsActive = false; 
 	// Varibles I should get from GameManager later
 	public List<GameObject> players;
 	public int wave;
@@ -30,6 +34,8 @@ public class AIMaster : MonoBehaviour
 	public int 	 m_fSpawnDist;		// How far away the spawner can be before it is disregarded for use (If no spawner is in range than waves will increment quickly. POTATO!)
 	public float m_fSpawnWaveMult;	// Multipler to the number range of how many zombies can be spawned this wave
 	public float m_fSpawnDownTime;	// After a spawner revives a zombie, how long to wait until another zombie is spawned
+
+
 
 	[HideInInspector]
 	public bool m_SpawnNow;
@@ -68,28 +74,56 @@ public class AIMaster : MonoBehaviour
 	#endregion
 
 	#region Initial Functions
+
+
+	void Awake()
+	{
+		if (m_bOFFLINEMODE) 
+		{
+			StartCoroutine(SpawnZombies())	;
+		
+		}
+	}
+
 	/* These functions are called as the scene is loaded and NEVER during gameplay  */
 
 	/// <summary>
 	/// Awake this instance. Initialize any internal varible that I will need to track
 	/// </summary>
-	void Awake()
+	public IEnumerator SpawnZombies()
 	{
-		m_SpawnNow = true;
-		m_fSpawnCD = m_fSpawnDownTime;
+		yield return new WaitForSeconds (5); // HACK FIX!!!! DO IT THE CORRECT WAY!!!!!
 
-		// Start by initizaling the groups
-		GroupAI.FindMaster(this);
-		GroupAI.s_iCap = m_iGroupLimit;
-
-		Vector3 nonActiveSpawn = new Vector3(0,5.0f,0);
-		m_iActiveZombies = 0;
-
-		// Spawn all possible zombies at once on load up
-		for (int i = 0; i < 32; ++i)
+		//if (PhotonNetwork.isMasterClient) 
 		{
-			m_Zombs[i] = (ZombieAI)((GameObject)GameObject.Instantiate(m_ZombieStd, nonActiveSpawn, Quaternion.identity)).GetComponent("ZombieAI");
-			m_Zombs[i].m_iMasterID = i;
+			m_SpawnNow = true;
+			m_fSpawnCD = m_fSpawnDownTime;
+
+			// Start by initizaling the groups
+			GroupAI.FindMaster(this);
+			GroupAI.s_iCap = m_iGroupLimit;
+
+			Vector3 nonActiveSpawn = new Vector3(0,5.0f,0);
+			m_iActiveZombies = 0;
+
+			// Spawn all possible zombies at once on load up
+			for (int i = 0; i < 32; ++i)
+			{
+				m_Zombs[i] = (ZombieAI)((GameObject)GameObject.Instantiate(m_ZombieStd, nonActiveSpawn, Quaternion.identity)).GetComponent("ZombieAI");
+				m_Zombs[i].m_iMasterID = i;
+			}
+
+			if(!m_bOFFLINEMODE)
+				Z_Network_ZombieSpawner.Get ().SummonRemoteZombies ();
+
+			//Activate all the Spanwnners now that AI Master is ready
+
+			Spawner[]  ZombieSpawns = FindObjectsOfType(typeof(Spawner)) as Spawner[];
+			foreach (Spawner zs in ZombieSpawns)
+			{
+				zs.Activate();
+			}
+			m_bIsActive = true;
 		}
 	}
 
@@ -176,8 +210,15 @@ public class AIMaster : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
+		if (!m_bIsActive)
+			return;
 		if (players.Count == 0)
 			return;
+		if (!m_bOFFLINEMODE) 
+		{
+			if (PhotonNetwork.isNonMasterClientInRoom)
+				return;
+		}
 
 		// Check if the wave is completed and a new one will have to be generated
 		if (m_iZombiesLeft <= 0)
@@ -204,7 +245,7 @@ public class AIMaster : MonoBehaviour
 					if ((m_ZombieBits & mask) == 0)	// This zombie has been marked as dead (0) in the bits
 					{
 						// Find appropiate spawner	// Potato: For now, I just always use the first spawner.
-						m_Spawns[0].Spawn(i);
+  						m_Spawns[0].Spawn(i);
 						m_ZombieBits = m_ZombieBits | mask;	// Set the bit as alive (1)
 						++m_iActiveZombies;
 						return;	// More often than not only 1 zombie will be dead right?

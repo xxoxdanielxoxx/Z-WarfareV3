@@ -44,32 +44,6 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 
 	}
 
-	IEnumerator Start()
-	{
-		//if (PhotonNetwork.isNonMasterClientInRoom)
-		//{
-
-
-			
-#if auth
-			//Ask the MC to spawn a User for him. give him your PhotonView
-			photonView.RPC("SpawnLocalPlayer",PhotonTargets.MasterClient, PhotonNetwork.player );
-
-
-#else
-			yield return new WaitForSeconds(5);
-			//SpawnLocalPlayer();  
-#endif	
-		//}
-
-
-		if (PhotonNetwork.isMasterClient) 
-		{
-			Z_Network_ZombieSpawner.Get().SendMessage ("SummonRemoteZombies", SendMessageOptions.DontRequireReceiver);
-		}
-
-	}
-	
 	//////////////////////////////
 	// Manage players
 	
@@ -135,8 +109,10 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 		//Manually allocate PhotonViewID
 		int id1 = PhotonNetwork.AllocateViewID();
 		
-		photonView.RPC("AddPlayer", PhotonTargets.AllBuffered, PhotonNetwork.player);
-		photonView.RPC("SpawnOnNetwork", PhotonTargets.AllBuffered, pos, rot, id1, PhotonNetwork.player);
+		photonView.RPC("AddPlayer", PhotonTargets.OthersBuffered, PhotonNetwork.player);
+		AddPlayer (PhotonNetwork.player);
+		photonView.RPC("SpawnOnNetwork", PhotonTargets.OthersBuffered, pos, rot, id1, PhotonNetwork.player);
+		SpawnOnNetwork (pos, rot, id1, PhotonNetwork.player);
 	}
 	
 	[RPC]
@@ -184,11 +160,12 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 		m_iCountOfplayers++;
 		if (m_iCountOfplayers == PhotonNetwork.countOfPlayers) 
 		{
-			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.AllBuffered);
+			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.OthersBuffered);
+			SpawnLocalPlayer();
 
+			 AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
+			 StartCoroutine( m.SpawnZombies());
 		}
-
 	}
-	
 
 }

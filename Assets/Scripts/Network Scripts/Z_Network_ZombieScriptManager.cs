@@ -79,7 +79,8 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 			//If we changed states, Broad cast this to the clients
 			if(m_ePrevZombieState != m_ZombieStateMachine.m_State)
 			{
-				photonView.RPC("ReceiverStates", PhotonTargets.Others, m_ZombieStateMachine.m_State);
+				//photonView.RPC("ReceiverStates", PhotonTargets.Others, (int)m_ZombieStateMachine.m_State);
+				//I need add a Genral Netowork Start
 			}
 		}
 
@@ -87,9 +88,9 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 	}  
 
 	[RPC]
-	void ReceiverStates(ZombieStates newState)
+	void ReceiverStates(int newState)
 	{
-		m_ZombieStateMachine.m_State = newState;
+		m_ZombieStateMachine.m_State = (ZombieStates)newState;
 	}
 
 
