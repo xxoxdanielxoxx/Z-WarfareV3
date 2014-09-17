@@ -358,28 +358,32 @@ public class WeaponManager : MonoBehaviour
 		Gun otherGun;
 		foreach (Collider weapon in m_pickupColliders)
 		{
-			GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
-			if (m_eTempGun == GunProperties.Gun.Pistol)
-				otherGun = Gun.Pistol;
-			else if (m_eTempGun == GunProperties.Gun.Shotgun)
-				otherGun = Gun.Shotgun;
-			else if (m_eTempGun == GunProperties.Gun.Rifle)
-				otherGun = Gun.Rifle;
-			else
-				otherGun = Gun.Sniper;
-			
-			if (otherGun == Gun.Pistol && m_ePrimary == Gun.Pistol ||
-			    otherGun == Gun.Pistol && m_eSecondary == Gun.Pistol ||
-			    otherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun ||
-			    otherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun ||
-			    otherGun == Gun.Rifle && m_ePrimary == Gun.Rifle ||
-			    otherGun == Gun.Rifle && m_eSecondary == Gun.Rifle ||
-			    otherGun == Gun.Sniper && m_ePrimary == Gun.Sniper ||
-			    otherGun == Gun.Sniper && m_eSecondary == Gun.Sniper)
+			if (weapon.GetComponentInParent<GunProperties>())
 			{
-				// the player is currently already carring that weapon, which means they can get ammo
-				// get ammo from the pickup
-				GetComponentInChildren<AmmoManager>().FillUpAmmo(weapon.transform.parent.GetComponentInParent<AmmoManager>());
+				// this is checking to see if there is indeed a GunProperties script on the pickup object
+				GunProperties.Gun m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+				if (m_eTempGun == GunProperties.Gun.Pistol)
+					otherGun = Gun.Pistol;
+				else if (m_eTempGun == GunProperties.Gun.Shotgun)
+					otherGun = Gun.Shotgun;
+				else if (m_eTempGun == GunProperties.Gun.Rifle)
+					otherGun = Gun.Rifle;
+				else
+					otherGun = Gun.Sniper;
+				
+				if (otherGun == Gun.Pistol && m_ePrimary == Gun.Pistol ||
+				    otherGun == Gun.Pistol && m_eSecondary == Gun.Pistol ||
+				    otherGun == Gun.Shotgun && m_ePrimary == Gun.Shotgun ||
+				    otherGun == Gun.Shotgun && m_eSecondary == Gun.Shotgun ||
+				    otherGun == Gun.Rifle && m_ePrimary == Gun.Rifle ||
+				    otherGun == Gun.Rifle && m_eSecondary == Gun.Rifle ||
+				    otherGun == Gun.Sniper && m_ePrimary == Gun.Sniper ||
+				    otherGun == Gun.Sniper && m_eSecondary == Gun.Sniper)
+				{
+					// the player is currently already carring that weapon, which means they can get ammo
+					// get ammo from the pickup
+					GetComponentInChildren<AmmoManager>().FillUpAmmo(weapon.transform.parent.GetComponentInParent<AmmoManager>());
+				}
 			}
 		}
 	}
