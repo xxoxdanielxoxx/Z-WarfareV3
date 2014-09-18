@@ -1,0 +1,18 @@
+Philip Ramirez's Daily Log. Updated anually.
+
+Daily Log
+
+
+
+
+					-=-= 9/16/14 =-=-
+---------------------------------------------------------------------------------------------------------
+|  BUGFIX: AIMaster will now get reference to anything tagged as "Player"				|
+|													|
+|  UPDATE: GroupAI now actually implements merging. First step to the promised metaball behavior	|
+|													|
+|  ADDDED: ---												|
+|         												|
+|													|
+|													|		
+---------------------------------------------------------------------------------------------------------

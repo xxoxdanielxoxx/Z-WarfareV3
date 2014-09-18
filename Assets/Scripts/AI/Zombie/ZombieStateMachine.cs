@@ -34,7 +34,7 @@ public class ZombieStateMachine : MonoBehaviour
 	// Use this for initialization
 	public void Reset () 
 	{
-		m_State = ZombieStates.Wander;
+		m_State = ZombieStates.LFG;
 	}
 
 	public void ChangeState(ZombieStates _state)

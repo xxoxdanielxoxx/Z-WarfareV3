@@ -28,9 +28,7 @@ public class Spawner : MonoBehaviour
 	int 	m_BitArrayGrid = 0x00;		// Use a bit array to represent the space around the spawner that is open
 	float	m_fGridResW;	// The width  of each cell in the grid. Make sure the player can fit in here!
 	float	m_fGridResH;	// The height of each cell in the grid. Make sure the player can fit in here!
-
-
-
+	
 
 	public void Activate()
 	{
@@ -77,69 +75,6 @@ public class Spawner : MonoBehaviour
 			#endregion
 		}
 	}
-	
-	/// <summary>
-	/// This function prepares the new wave. It will spawn multiple zombies and put them into a group. This is to streamline the process of spawning intial waves
-	/// </summary>
-	/// <returns>The to spawn.</returns>
-	/// <param name="_waveNum">Wave number the players are currently on.</param>
-	public void PrepareToSpawn(int _waveNum)
-	{
-		//int zombieSpawn = Random.Range (0, 7);
-
-
-		// Create a new group to spawn all the zombies in. This is the initial group
-		//m_Master.CreateNewGroup(this.gameObject.transform.position);
-
-		//for (int i = 0; i < zombieSpawn; ++i)	// Do the spawning here
-		//{
-		//	Spawn(m_Master.ZombiesActive, m_Master.m_Groups[m_Master.m_Groups.Count-1]);
-		//}
-
-	}
-
-	/// <summary>
-	/// Finds the world position to spawn the zombie at.
-	/// </summary>
-	/// <returns>The spawn location.</returns>
-	Vector3 FindSpawnLoc()
-	{
-		Vector3 cellPosOrg = this.gameObject.transform.position;
-		cellPosOrg.x -= m_fGridResW * 3;
-		cellPosOrg.z -= m_fGridResH * 3;
-		Vector3 returnVec = cellPosOrg;		// Position in world space of the cell being considered for spawning
-		int spawningCell = m_Master.ZombiesActive%16;	// The point around that spawner that will be checked for openess. Start at this number so that I skipped point that I can assume are already in use
-		int bitToCheck = m_BitArrayGrid & (0x01 << spawningCell);
-
-		if (bitToCheck == 0)	// Spawn point is clear of walls and enviromental collision
-		{
-			returnVec.x = cellPosOrg.x + (m_fGridResW*2) * (spawningCell%4);
-			returnVec.z = cellPosOrg.z + (m_fGridResH*2) * (spawningCell/4);
-
-			return returnVec;	// So pass back this position to whatever needs to know!
-		}
-		else	// Spawn point isn't clear. Find one that is
-		{
-			// Run through every spawn point at least once
-			for (int i = 0; i < 16; ++i)
-			{
-				spawningCell = (spawningCell + 1)%16;
-				bitToCheck = m_BitArrayGrid & (0x01 << spawningCell);
-
-				if (bitToCheck == 0)	// Spawn point is clear of walls and enviromental collision
-				{
-					returnVec.x = cellPosOrg.x + (m_fGridResW*2) * (spawningCell%4);
-					returnVec.z = cellPosOrg.z + (m_fGridResH*2) * (spawningCell/4);
-
-					return returnVec;	// So pass back this position to whatever needs to know!
-				}
-			}
-		}
-
-		// If we got to this point then every single spawn point is blocked. Deactiving spawn point
-		m_Active = false;
-		return Vector3.zero;
-	}
 
 	/// <summary>
 	/// Spawn a zombie marked as dead at this spawner.
@@ -148,7 +83,6 @@ public class Spawner : MonoBehaviour
 	/// <param name="_group">If a group is passed in, this is the group the Zombie will join.</param>
 	public void Spawn(int _i)
 	{
-		//Vector3 spawnLoc = FindSpawnLoc();
 		if (!m_Active)
 			return;
 
@@ -157,10 +91,7 @@ public class Spawner : MonoBehaviour
 			return;
 		}
 
-		m_Master.CreateNewGroup ();
-
 		m_Master.m_Zombs[_i].gameObject.transform.position = this.gameObject.transform.position;
-		m_Master.m_Groups[m_Master.m_Groups.Count-1].AddZombie(m_Master.m_Zombs[_i]);
 
 		m_Master.m_Zombs[_i].Rebirth();
 	}

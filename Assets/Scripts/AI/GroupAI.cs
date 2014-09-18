@@ -19,6 +19,7 @@ public class GroupAI : ScriptableObject
 	public Vector3	m_GroupCenter;	// The point in between all the zombies
 
 	public int 		m_iPopulation;	// How many zombies are currently in this group
+	public int		m_iIndex;		// The index of this group in the master array for quick comparisons
 
 	public float	m_fPopRatio;	// Percent of filled capacity
 
@@ -34,8 +35,10 @@ public class GroupAI : ScriptableObject
 	}
 
 	// Use this for initialization
-	public void Init() 
+	public void Init(int _mIdx) 
 	{
+		m_iIndex = _mIdx;
+
 		m_Zombie = new List<ZombieAI>();
 		m_iPopulation = -1;
 		m_GroupCenter = Vector3.zero;
@@ -57,6 +60,13 @@ public class GroupAI : ScriptableObject
 		--m_iPopulation;
 		
 		m_fPopRatio = (float)m_iPopulation/(float)s_iCap;
+
+		if (m_iPopulation <= 0)
+		{
+			// Now kill the other group
+			m_Master.m_Groups.Remove(this);
+			GameObject.Destroy(this);	// POTATO! Recycle this later
+		}
 	}
 
 	public void MergeGroup(GroupAI _other)

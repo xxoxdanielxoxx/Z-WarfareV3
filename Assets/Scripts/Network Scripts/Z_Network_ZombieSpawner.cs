@@ -28,9 +28,7 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 	//For Host To Call
 	public void SummonRemoteZombies()
 	{
-		AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-
-		ZombieAI[] zombies = m.m_Zombs;
+		ZombieAI[] zombies = AIMaster.m_Reference.m_Zombs;
 		if (zombies == null) 
 		{
 			Debug.Log("Error AI MASTER's Zombies are NULL");

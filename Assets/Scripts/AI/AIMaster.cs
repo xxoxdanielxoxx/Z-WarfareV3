@@ -18,11 +18,13 @@ public class AIMaster : Photon.MonoBehaviour
 	public bool m_bOFFLINEMODE = true;
 	private bool m_bIsActive = false; 
 	// Varibles I should get from GameManager later
-	public List<GameObject> players;
+	public GameObject[] players;
 	public int wave;
 
+	// A static reference to this class incase it is needed by any other script
+	public static AIMaster m_Reference;
+
 	// Reference to all the zombie prefabs
-	public GameObject	m_GroupRef;		// Group Object 
 	public GameObject	m_ZombieStd;	// Standard zombie
 	public GameObject	m_ZombieRun;	// Runner zombie
 	public GameObject	m_ZombieCom;	// Commander zombie
@@ -71,6 +73,18 @@ public class AIMaster : Photon.MonoBehaviour
 		set {m_iActiveZombies = value;}
 	}
 
+	public bool IsZombieAlive(int _zombIdx)
+	{
+		uint mask = 0x00000001;
+		uint bits = m_ZombieBits;
+		bits = (bits << _zombIdx);	// Move the set bit by to the index of the zombie we need to check if it's alive
+
+		if ((bits & mask) == mask)
+			return true;
+		else
+			return false;
+	}
+
 	#endregion
 
 	#region Initial Functions
@@ -81,7 +95,7 @@ public class AIMaster : Photon.MonoBehaviour
 		if (m_bOFFLINEMODE) 
 		{
 			StartCoroutine(SpawnZombies())	;
-		
+
 		}
 	}
 
@@ -94,37 +108,40 @@ public class AIMaster : Photon.MonoBehaviour
 	{
 		yield return new WaitForSeconds (5); // HACK FIX!!!! DO IT THE CORRECT WAY!!!!!
 
-		//if (PhotonNetwork.isMasterClient) 
+		if (m_Reference == null)
+			m_Reference = this;
+
+		players = new GameObject[4];
+		players = GameObject.FindGameObjectsWithTag ("Player");
+
+		m_SpawnNow = true;
+		m_fSpawnCD = m_fSpawnDownTime;
+
+		// Start by initizaling the groups
+		GroupAI.FindMaster(this);
+		GroupAI.s_iCap = m_iGroupLimit;
+
+		Vector3 nonActiveSpawn = new Vector3(0,5.0f,0);
+		m_iActiveZombies = 0;
+
+		// Spawn all possible zombies at once on load up
+		for (int i = 0; i < 32; ++i)
 		{
-			m_SpawnNow = true;
-			m_fSpawnCD = m_fSpawnDownTime;
-
-			// Start by initizaling the groups
-			GroupAI.FindMaster(this);
-			GroupAI.s_iCap = m_iGroupLimit;
-
-			Vector3 nonActiveSpawn = new Vector3(0,5.0f,0);
-			m_iActiveZombies = 0;
-
-			// Spawn all possible zombies at once on load up
-			for (int i = 0; i < 32; ++i)
-			{
-				m_Zombs[i] = (ZombieAI)((GameObject)GameObject.Instantiate(m_ZombieStd, nonActiveSpawn, Quaternion.identity)).GetComponent("ZombieAI");
-				m_Zombs[i].m_iMasterID = i;
-			}
-
-			if(!m_bOFFLINEMODE)
-				Z_Network_ZombieSpawner.Get ().SummonRemoteZombies ();
-
-			//Activate all the Spanwnners now that AI Master is ready
-
-			Spawner[]  ZombieSpawns = FindObjectsOfType(typeof(Spawner)) as Spawner[];
-			foreach (Spawner zs in ZombieSpawns)
-			{
-				zs.Activate();
-			}
-			m_bIsActive = true;
+			m_Zombs[i] = (ZombieAI)((GameObject)GameObject.Instantiate(m_ZombieStd, nonActiveSpawn, Quaternion.identity)).GetComponent("ZombieAI");
+			m_Zombs[i].m_iMasterID = i;
 		}
+
+		if(!m_bOFFLINEMODE)
+			Z_Network_ZombieSpawner.Get ().SummonRemoteZombies ();
+
+		//Activate all the Spanwnners now that AI Master is ready
+
+		Spawner[]  ZombieSpawns = FindObjectsOfType(typeof(Spawner)) as Spawner[];
+		foreach (Spawner zs in ZombieSpawns)
+		{
+			zs.Activate();
+		}
+		m_bIsActive = true;
 	}
 
 	/// <summary>
@@ -161,7 +178,7 @@ public class AIMaster : Photon.MonoBehaviour
 		m_Groups.Add((GroupAI)ScriptableObject.CreateInstance("GroupAI"));
 		
 		++m_iGroupCount;
-		m_Groups[m_iGroupCount].Init();
+		m_Groups[m_Groups.Count-1].Init(m_Groups.Count-1);
 	}
 
 	/// <summary>
@@ -212,7 +229,7 @@ public class AIMaster : Photon.MonoBehaviour
 	{
 		if (!m_bIsActive)
 			return;
-		if (players.Count == 0)
+		if (players.Length == 0)
 			return;
 		if (!m_bOFFLINEMODE) 
 		{

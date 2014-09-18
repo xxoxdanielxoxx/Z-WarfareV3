@@ -45,13 +45,13 @@ public class ZombieThreatLogic : MonoBehaviour
 		uint threatSum = 0;
 		
 		// Add up the threat of each player
-		for (int i = 0; i < GroupAI.m_Master.players.Count;  ++i) 
+		for (int i = 0; i < GroupAI.m_Master.players.Length;  ++i) 
 		{
 			threatSum += m_Hatred[i];
 		}
 		
 		// Divide the sumation to get the percent of hate a player has, which will directly translate to threat
-		for (byte i = 0; i < GroupAI.m_Master.players.Count; ++i)
+		for (byte i = 0; i < GroupAI.m_Master.players.Length; ++i)
 		{
 			m_Threat[i] = (float)m_Hatred[i]/(float)threatSum;
 		}

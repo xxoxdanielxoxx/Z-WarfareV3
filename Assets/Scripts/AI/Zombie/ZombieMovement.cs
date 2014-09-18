@@ -118,10 +118,10 @@ public class ZombieMovement : MonoBehaviour
 		Vector3 mid = _pos;	// Recalculate the mid point since the player might've moved
 		Vector3 offset = Vector3.zero;	// This offset will let the zombies move closer to high threat players
 
-		if (GroupAI.m_Master.players.Count > 1)
+		if (GroupAI.m_Master.players.Length > 1)
 		{
 			// Divide the sumation to get the percent of hate a player has, which will directly translate to threat
-			for (int i = 0; i < GroupAI.m_Master.players.Count; ++i)
+			for (int i = 0; i < GroupAI.m_Master.players.Length; ++i)
 			{
 				offset += _zThreat.m_Threat[i] * (GroupAI.m_Master.players[i].transform.position - mid);
 			}
