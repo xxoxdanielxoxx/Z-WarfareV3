@@ -30,12 +30,11 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 	void Awake()
 	{
 		SP = this;
+		m_iCountOfplayers = 0;
 		
 		if (PhotonNetwork.isMasterClient) 
-		{
 			ReadyCheck ();
-
-		} 
+		 
 		else 
 		{
 			photonView.RPC("ReadyCheck",PhotonTargets.MasterClient);	
@@ -100,7 +99,7 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 	void SpawnLocalPlayer()
 	{
 
-		//Get random spawnpoint
+		//Get random spawnpoint //FIX THIS WHERE PLAYERS GET THEROE OWN SPAWN
 		GameObject[] spawnPoints = GameObject.FindGameObjectsWithTag("playerSpawn");
 		GameObject theGO = spawnPoints[Random.Range(0, spawnPoints.Length)];
 		Vector3 pos = theGO.transform.position;
@@ -111,7 +110,11 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 		
 		photonView.RPC("AddPlayer", PhotonTargets.OthersBuffered, PhotonNetwork.player);
 		AddPlayer (PhotonNetwork.player);
+
+		//Spawns myself Remote to others
 		photonView.RPC("SpawnOnNetwork", PhotonTargets.OthersBuffered, pos, rot, id1, PhotonNetwork.player);
+
+		//Spawns  myself Locallaly
 		SpawnOnNetwork (pos, rot, id1, PhotonNetwork.player);
 	}
 	
@@ -122,25 +125,13 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 		//Set transform
 		PlayerInfo4 pNode = GetPlayer(np);
 		pNode.transform = newPlayer;
+
 		//Set photonview ID everywhere!
-		SetPhotonViewIDs(newPlayer.gameObject, id1);
+		newPlayer.GetComponent<PhotonView> ().viewID = id1;
 		
 		if (pNode.IsLocal())
-		{
 			localPlayerInfo = pNode;
-		}
-
 	}
-	
-	//When a PhotonView instantiates it has viewID=0 and is unusable.
-	//We need to assign the right viewID -on all players(!)- for it to work
-	void SetPhotonViewIDs(GameObject go, int id1)
-	{
-		PhotonView[] nViews = go.GetComponentsInChildren<PhotonView>();
-		nViews[0].viewID = id1;
-	}
-
-	
 
 	//On all clients: When a remote client disconnects, cleanup
 	void OnPhotonPlayerDisconnected(PhotonPlayer player)
@@ -158,14 +149,14 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
     void ReadyCheck()
 	{
 		m_iCountOfplayers++;
+
 		if (m_iCountOfplayers == PhotonNetwork.countOfPlayers) 
 		{
 			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.OthersBuffered);
 			SpawnLocalPlayer();
 
-			 AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-			 StartCoroutine( m.SpawnZombies());
+			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
+			StartCoroutine( m.SpawnZombies());
 		}
 	}
-
 }

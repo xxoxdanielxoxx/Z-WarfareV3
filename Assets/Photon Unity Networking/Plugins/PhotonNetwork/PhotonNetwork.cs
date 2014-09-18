@@ -928,10 +928,10 @@ public static class PhotonNetwork
     static PhotonNetwork()
     {
 #if UNITY_EDITOR
-        if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)
+        if (!EditorApplication.isPlaying && !EditorApplication.isPlayingOrWillChangePlaymode)	
         {
             //Debug.Log(string.Format("PhotonNetwork.ctor() Not playing {0} {1}", UnityEditor.EditorApplication.isPlaying, UnityEditor.EditorApplication.isPlayingOrWillChangePlaymode));
-            return;
+            return; // << Potato: return means this function doesn't execute which means that builds can't use this function.
         }
 
         // This can happen when you recompile a script IN play made

@@ -52,7 +52,6 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 		{
 			//m_NetRigidBody.enabled = false;
 			m_ZombieStateMachine.m_bIsHost = true;
-			//photonView
 		} 
 		else 
 		{
@@ -62,9 +61,7 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 			m_NavMeshAgent.enabled    	= false;
 
 			m_ZombieStateMachine.m_bIsHost = false;
-
 		}
-
 
 	}
 

@@ -11,12 +11,6 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 	void Awake()
 	{
 		s_ZS = this;
-
-//		if (PhotonNetwork.isNonMasterClientInRoom) 
-//		{
-//			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-//			m.enabled = false;
-//		} 
 	}
 
 	public static Z_Network_ZombieSpawner Get()
@@ -45,28 +39,21 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 		{
 			//Manually allocate PhotonViewID
 			int id1 = PhotonNetwork.AllocateViewID();
-
-			Debug.Log( " Zombie ID = " + id1);
-			//Set ID
-
-
 			zombies[i].gameObject.GetPhotonView().viewID = id1;
-
-			//id1 = zombies[i].gameObject.GetPhotonView().viewID; 
-
+			//Debug.Log( " Zombie ID = " + id1);
 
 			//Get The POS And ROT
 			Vector3 pos 	= zombies[i].transform.position;
 			Quaternion rot 	= zombies[i].transform.rotation;
 
 
-
-			Debug.Log("Player Count = " + PhotonNetwork.countOfPlayers);
-			if (PhotonNetwork.countOfPlayers <= 1) 
-			{
-				Debug.Log("Single Player ");
-				return; 
-			}
+			//ERROR, doesnt work on the EXE need to Log to txt countof players
+//			Debug.Log("Player Count = " + PhotonNetwork.countOfPlayers);
+//			if (PhotonNetwork.countOfPlayers <= 1) 
+//			{
+//				Debug.Log("Single Player ");
+//				return; 
+//			}
 
 			//Transmit the Clients the ID, and have them Spawn the Zombies
 			//NOTE ADD TYPE
@@ -83,18 +70,7 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 		Transform remoteZombie = Instantiate(m_RegZombiePrefab, pos, rot) as Transform;
 
 		remoteZombie.GetComponent<PhotonView>().viewID = id1 ;
-
-
-		//Set photonview ID everywhere!
-		//SetPhotonViewIDs(remoteZombie.gameObject, id1);
-	
 	}
 
-	//When a PhotonView instantiates it has viewID=0 and is unusable.
-	//We need to assign the right viewID -on all players(!)- for it to work
-	void SetPhotonViewIDs(GameObject go, int id1)
-	{
-		PhotonView[] nViews = go.GetComponentsInChildren<PhotonView>();
-		nViews[0].viewID = id1;
-	}
+
 }
