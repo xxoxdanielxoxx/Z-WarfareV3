@@ -89,14 +89,14 @@ public class ZombieAI : MonoBehaviour
 		Vector3 avgPos = Vector3.zero;	// Start at (0,0,0)
 
 		if (GroupAI.m_Master.players.Length == 1)
-						return GroupAI.m_Master.players [0].transform.position;
+			return GroupAI.m_Master.players [0].transform.position;
 
 		for (int i = 0; i < GroupAI.m_Master.players.Length; ++i)
 		{
 			avgPos += GroupAI.m_Master.players[i].transform.position;	// Get a summation of all the player pos
 		}
-		avgPos /= (GroupAI.m_Master.players.Length-1);	// Divide by the number of players
-		
+		avgPos /= (GroupAI.m_Master.players.Length);	// Divide by the number of players
+
 		return avgPos;	// And this is the average
 	}
 
@@ -189,8 +189,8 @@ public class ZombieAI : MonoBehaviour
 			}
 			else if (m_StateScript.m_State == ZombieStates.LFG)
 			{
-				// Potato Idea: Hey, what if the zombies in this state avoided the player. Stay within sight of the group, but try to hide from the player and try to get in range of other zombies
-				Debug.Log("I want a friend!");
+				// Potato Idea: Hey, what if the zombies in this state avoided the player. 
+				//   Stay within sight of the group, but try to hide from the player and try to get in range of other zombies
 
 				AIMaster master = AIMaster.m_Reference;
 
@@ -203,13 +203,11 @@ public class ZombieAI : MonoBehaviour
 
 						if ((zomb.transform.position - this.transform.position).magnitude < 30)	// The two zombies are in a close distance of each other. Group up
 						{
-							Debug.Log("Will you be my friend?");
 							if (zomb.m_Group == null)	// The zombie we're checking doesn't have a group
 							{
 								if (this.m_Group != null)	// if I do then add the other zombie to this group
 								{
 									m_Group.AddZombie(zomb);
-									Debug.Log("Ok, you can join me!");
 
 									break;
 								}
@@ -219,7 +217,6 @@ public class ZombieAI : MonoBehaviour
 									m_Group = master.m_Groups[master.m_Groups.Count-1];
 									m_Group.AddZombie(this);
 									m_Group.AddZombie(zomb);
-									Debug.Log("Let's form our own club!");
 
 									break;
 								}
@@ -231,7 +228,6 @@ public class ZombieAI : MonoBehaviour
 									if (zomb.m_Group.m_iIndex != this.m_Group.m_iIndex)	// Make sure they aren't the same group
 									{
 										zomb.m_Group.MergeGroup(m_Group);	// Since I'm the one looking for a group, I'll join the other group
-										Debug.Log("Hey, can my friends join your friends?");
 									
 										break;
 									}
@@ -239,13 +235,10 @@ public class ZombieAI : MonoBehaviour
 								else 	// I don't have a group, I need to be added to the other zombie group
 								{
 									zomb.m_Group.AddZombie(this);
-									Debug.Log("Can I join your team?");
 
 									break;
 								}
 							}
-
-							Debug.Log("Just as not planned!");
 							m_StateScript.m_State = ZombieStates.Wander;	// Something got added to a group so stop looking!
 						}
 					}

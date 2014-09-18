@@ -32,7 +32,7 @@ public class ZombieThreatLogic : MonoBehaviour
 		// Set up threat system
 		for (int i = 0; i < 8;  ++i) 
 		{
-			m_Threat[i] = 1;
+			m_Threat[i] = 0;
 		}
 		m_Threat[7] = 0;
 		

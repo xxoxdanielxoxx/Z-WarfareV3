@@ -7,12 +7,16 @@ Daily Log
 
 					-=-= 9/16/14 =-=-
 ---------------------------------------------------------------------------------------------------------
-|  BUGFIX: AIMaster will now get reference to anything tagged as "Player"				|
-|													|
-|  UPDATE: GroupAI now actually implements merging. First step to the promised metaball behavior	|
-|													|
-|  ADDDED: ---												|
-|         												|
-|													|
-|													|		
+  BUGFIX: 
+  		-AIMaster will now get reference to anything tagged as "Player"
+  		-Zombies will now by default wander towards a mid point between all the players		
+													
+  UPDATE:	
+  		-GroupAI now actually implements merging. First step to the promised metaball behavior	
+  		-Got rid of some debug lines that shouldn't concern anyone else.
+													
+  ADDDED: ---										
+         											
+													
+													
 ---------------------------------------------------------------------------------------------------------
