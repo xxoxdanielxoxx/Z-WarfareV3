@@ -94,8 +94,7 @@ public class AIMaster : Photon.MonoBehaviour
 	{
 		yield return new WaitForSeconds (5); // HACK FIX!!!! DO IT THE CORRECT WAY!!!!!
 
-		//if (PhotonNetwork.isMasterClient) 
-		{
+
 			m_SpawnNow = true;
 			m_fSpawnCD = m_fSpawnDownTime;
 
@@ -124,7 +123,7 @@ public class AIMaster : Photon.MonoBehaviour
 				zs.Activate();
 			}
 			m_bIsActive = true;
-		}
+	
 	}
 
 	/// <summary>
