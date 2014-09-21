@@ -21,7 +21,8 @@ public class Bullet : MonoBehaviour
 	private RaycastHit m_rHit;
 	private float m_fDistanceTraveled = 0;
 	private float m_fBulletRange = 100;
-	
+	private int m_iPlayerID;
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -61,6 +62,11 @@ public class Bullet : MonoBehaviour
 //				
 //		}
 	}
+
+	public void SetPlayerID(int ID)
+	{
+		m_iPlayerID = ID;
+	}
 	
 	public void SetBulletSpeed(float input)
 	{
@@ -82,6 +88,13 @@ public class Bullet : MonoBehaviour
 	{
 		return m_iDamage;
 	}
+
+	public int GetPlayerID()
+	{
+		return m_iPlayerID;
+	}
+
+
 	
 	// bullets have position, direction, damage, speed
 	// position and direction are determined upon firing, damage is determined by prefab

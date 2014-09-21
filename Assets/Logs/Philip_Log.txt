@@ -15,8 +15,18 @@ Daily Log
   		-GroupAI now actually implements merging. First step to the promised metaball behavior	
   		-Got rid of some debug lines that shouldn't concern anyone else.
 													
-  ADDDED: ---										
-         											
+  ADDDED: ---																						
 													
+---------------------------------------------------------------------------------------------------------
+
+					-=-= 9/20/14 =-=-
+---------------------------------------------------------------------------------------------------------
+  BUGFIX: ---	
+													
+  UPDATE: ---
+													
+  ADDDED: ---
+  
+  NOTES : Worked all evening with George. This build features a lot of little bug fixes for both AI and network code but I can't exactly remember what they were.																					
 													
 ---------------------------------------------------------------------------------------------------------

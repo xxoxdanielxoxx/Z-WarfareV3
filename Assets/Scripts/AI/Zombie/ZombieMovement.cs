@@ -111,7 +111,7 @@ public class ZombieMovement : MonoBehaviour
 		
 		if (_zThreat.m_AggrOn)	// Locked onto a target, ignore the Threat and just head straight to target
 		{
-			agent.SetDestination(GroupAI.m_Master.players[_zThreat.m_TargetIdx].transform.position);	// And tell it to target this new point!
+			agent.SetDestination(AIMaster.m_Reference.players[_zThreat.m_TargetIdx].transform.position);	// And tell it to target this new point!
 			return;
 		}
 		
@@ -123,7 +123,7 @@ public class ZombieMovement : MonoBehaviour
 			// Divide the sumation to get the percent of hate a player has, which will directly translate to threat
 			for (int i = 0; i < GroupAI.m_Master.players.Length; ++i)
 			{
-				offset += _zThreat.m_Threat[i] * (GroupAI.m_Master.players[i].transform.position - mid);
+				offset += _zThreat.m_Threat[i] * (AIMaster.m_Reference.players[i].transform.position - mid);
 			}
 		}
 		

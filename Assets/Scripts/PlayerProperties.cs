@@ -14,6 +14,9 @@ public class PlayerProperties : MonoBehaviour
 		None
 	}
 
+	//THIS IS THE HONOR SYSTEM DONT CHANGE THIS VALUE
+	public int m_iID;
+
 	public Guns gun;
 	void Start () 
 	{
@@ -28,4 +31,6 @@ public class PlayerProperties : MonoBehaviour
 
 
 	}
+
+
 }

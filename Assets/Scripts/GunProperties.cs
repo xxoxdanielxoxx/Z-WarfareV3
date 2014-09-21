@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class GunProperties : MonoBehaviour 
+public class GunProperties : Photon.MonoBehaviour 
 {
 	public enum Gun
 	{
@@ -31,6 +31,7 @@ public class GunProperties : MonoBehaviour
 	private bool m_bReloading = false;
 	public float m_fReloadTime = 2.0f;
 	
+
 	// Use this for initialization
 	void Start ()
 	{
@@ -73,24 +74,37 @@ public class GunProperties : MonoBehaviour
 			if (m_iAmmo > 0 && !m_bReloading)
 			{
 				m_fFireRateTimer = m_fFireRate;
+				int playerID =  transform.root.GetComponent<PlayerProperties>().m_iID;
+				PhotonView pv = transform.root.GetComponent<PhotonView>();
+
+
+				//Debug.Log(GetComponent<PlayerProperties>());
+				//Debug.Log(GetComponent<PlayerProperties>().m_iID);
+
 				if (m_eGun == Gun.Shotgun)
 				{
+
+
 					//Transform bulletTrajectory = m_GBulletSocket.transform;
 					//Quaternion bulletRotation = m_bulletSocket.transform.rotation;
 					for (int i = 0; i < m_iNumShotgunPellets; i++) 
 					{
 						Quaternion bulletRotation = new Quaternion(m_bulletSocket.transform.rotation.x, m_bulletSocket.transform.rotation.y, m_bulletSocket.transform.rotation.z, m_bulletSocket.transform.rotation.w);
 						bulletRotation.eulerAngles += new Vector3(Random.Range(-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread));
-						GameObject bullet = (GameObject) Instantiate (Resources.Load ("Bullet"), m_bulletSocket.transform.position, bulletRotation);
-						bullet.GetComponent<Bullet>().SetDamage(m_iDamage);
-						bullet.GetComponent<Bullet>().SetBulletSpeed(m_fBulletSpeed);
+					
+						InstantiateBullet( m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
+
+						//Create Networked Bullet 
+						if(pv != null)
+							pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
 					}
 				}
 				else
 				{
-					GameObject bullet = (GameObject) Instantiate (Resources.Load ("Bullet"), m_bulletSocket.transform.position, m_bulletSocket.transform.rotation);
-					bullet.GetComponent<Bullet>().SetDamage(m_iDamage);
-					bullet.GetComponent<Bullet>().SetBulletSpeed(m_fBulletSpeed);
+					InstantiateBullet(m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID);
+					//Create Networked Bullet
+					if(pv != null)
+						pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID );
 				}
 				m_iAmmo--;
 				// do gun recoil
@@ -103,6 +117,17 @@ public class GunProperties : MonoBehaviour
 			}
 
 		}
+	}
+
+	//Creats a local Bullet
+	void InstantiateBullet(Vector3 pos, Quaternion rot, int dmg, float spd, int ID)
+	{
+
+		Debug.Log ("Creating Bullet");
+		GameObject bullet = (GameObject) Instantiate (Resources.Load ("Bullet"), pos, rot);
+		bullet.GetComponent<Bullet>().SetDamage(m_iDamage);
+		bullet.GetComponent<Bullet>().SetBulletSpeed(m_fBulletSpeed);
+		bullet.GetComponent<Bullet>().SetPlayerID(ID);
 	}
 	
 	private IEnumerator Reload()

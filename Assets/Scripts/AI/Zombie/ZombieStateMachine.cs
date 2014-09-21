@@ -16,7 +16,6 @@ public class ZombieStateMachine : MonoBehaviour
 {
 	ZombieAI m_behaviour;
 
-	public bool m_bIsHost;
 
 	// The state of the zombie
 	public ZombieStates m_State;
@@ -29,6 +28,7 @@ public class ZombieStateMachine : MonoBehaviour
 	void Awake()
 	{
 		m_State = ZombieStates.Dead;
+
 	}
 
 	// Use this for initialization
@@ -39,8 +39,11 @@ public class ZombieStateMachine : MonoBehaviour
 
 	public void ChangeState(ZombieStates _state)
 	{
-		if (!m_bIsHost)
+		if (m_behaviour == null)
+		{
+			ChangeStateRemoteSafe(_state);
 			return;
+		}
 
 		switch(_state)
 		{
@@ -69,10 +72,48 @@ public class ZombieStateMachine : MonoBehaviour
 			goto default;
 
 		case ZombieStates.Dead:
-			GroupAI.m_Master.ZombieDeath(m_behaviour.m_iMasterID);
+			AIMaster.m_Reference.ZombieDeath(m_behaviour.m_iMasterID);
 
 			goto default;
 
+		default:
+			m_State = _state;
+			return;
+		}
+	}
+
+	void ChangeStateRemoteSafe(ZombieStates _state)
+	{
+		switch(_state)
+		{
+		case ZombieStates.Wander:
+			
+			goto default;
+			
+		case ZombieStates.Run:
+			
+			goto default;
+			
+		case ZombieStates.Lock:
+			
+			goto default;
+			
+		case ZombieStates.LFG:
+			
+			goto default;
+			
+		case ZombieStates.Attack:
+			
+			goto default;
+			
+		case ZombieStates.Dying:
+			
+			goto default;
+			
+		case ZombieStates.Dead:
+			
+			goto default;
+			
 		default:
 			m_State = _state;
 			return;

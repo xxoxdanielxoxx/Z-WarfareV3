@@ -12,6 +12,8 @@ Daily Log
 |9/7/14  N/A											|		
 -------------------------------------------------------------------------------------------------
 
+
+
 9/17/14		update: EXE now works as HOST
 		chng: unnessary Photon ID function in spawning local player
 		chng: had to remove the single player check in spawning remote zombies, need to find another way to avoid the RPCS

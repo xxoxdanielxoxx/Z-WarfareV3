@@ -25,7 +25,7 @@ public class AudioManager : MonoBehaviour {
 	void Start()
 	{
 		m_manager = GameObject.Find("GameMaster");
-		m_player = GameObject.Find("First Person Controller");
+		m_player   = GameObject.Find("First Person Controller");
 	}
 
 	void Update()

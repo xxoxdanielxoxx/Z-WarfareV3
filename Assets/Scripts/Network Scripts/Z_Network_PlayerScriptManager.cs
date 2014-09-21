@@ -44,6 +44,21 @@ public class Z_Network_PlayerScriptManager : Photon.MonoBehaviour
 		}
 	}
 
+	
+
+
+	[RPC]
+	public void InstantiateNetworkBullet(Vector3 pos, Quaternion rot, int dmg, float spd, int ID)
+	{
+
+		Debug.Log ("Creating a Network  Bullet");
+		GameObject bullet = (GameObject) Instantiate (Resources.Load ("Bullet"), pos, rot);
+		bullet.GetComponent<Bullet>().SetDamage(dmg);
+		bullet.GetComponent<Bullet>().SetBulletSpeed(spd);
+		bullet.GetComponent<Bullet>().SetPlayerID(ID);
+
+	}
+
 
 	
 

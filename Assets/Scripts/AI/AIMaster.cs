@@ -111,8 +111,11 @@ public class AIMaster : Photon.MonoBehaviour
 		if (m_Reference == null)
 			m_Reference = this;
 
+
+
+		PlayerIDManager.Get().Activate();
 		players = new GameObject[4];
-		players = GameObject.FindGameObjectsWithTag ("Player");
+		players = PlayerIDManager.Get ().GetALLPlayers ();
 
 		m_SpawnNow = true;
 		m_fSpawnCD = m_fSpawnDownTime;

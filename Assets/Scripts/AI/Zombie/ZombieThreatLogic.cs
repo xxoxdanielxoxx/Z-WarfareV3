@@ -40,12 +40,19 @@ public class ZombieThreatLogic : MonoBehaviour
 		m_AggrOn = false;
 	}
 
+	public void BuildHate(uint _hate, int _pIdx)
+	{
+		m_Hatred [_pIdx] += _hate;
+
+		CalculateThreat ();
+	}
+
 	public void CalculateThreat()
 	{
 		uint threatSum = 0;
 		
 		// Add up the threat of each player
-		for (int i = 0; i < GroupAI.m_Master.players.Length;  ++i) 
+		for (int i = 0; i < AIMaster.m_Reference.players.Length;  ++i) 
 		{
 			threatSum += m_Hatred[i];
 		}

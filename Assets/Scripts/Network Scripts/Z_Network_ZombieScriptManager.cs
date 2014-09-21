@@ -51,7 +51,7 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 		if (m_bIsHost) 
 		{
 			//m_NetRigidBody.enabled = false;
-			m_ZombieStateMachine.m_bIsHost = true;
+			//m_ZombieStateMachine.m_bIsHost = true;
 		} 
 		else 
 		{
@@ -60,7 +60,7 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 			m_ZombieAIScript.enabled    = false;
 			m_NavMeshAgent.enabled    	= false;
 
-			m_ZombieStateMachine.m_bIsHost = false;
+			//m_ZombieStateMachine.m_bIsHost = false;
 		}
 
 	}
@@ -81,7 +81,7 @@ public class Z_Network_ZombieScriptManager : Photon.MonoBehaviour
 			}
 		}
 
-		m_ePrevZombieState = m_ZombieStateMachine.m_State;
+		//m_ePrevZombieState = m_ZombieStateMachine.m_State;
 	}  
 
 	[RPC]

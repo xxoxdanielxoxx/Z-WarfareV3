@@ -120,14 +120,13 @@ public class ZombieAI : MonoBehaviour
 		transform.position = new Vector3 (0,-15f, 0);
 
 		if (m_MovementScript.enabled)
-		m_MovementScript.agent.enabled = false;
+			m_MovementScript.agent.enabled = false;
 	}
 
 	void FixedUpdate()
 	{
 		if (m_StateScript.m_State == ZombieStates.Dead)
 		{
-			//transform.position = new Vector3(0, -500.0f, 0);
 			return;
 		}
 
@@ -153,7 +152,7 @@ public class ZombieAI : MonoBehaviour
 				// Divide the sumation to get the percent of hate a player has, which will directly translate to threat
 				for (byte i = 0; i < GroupAI.m_Master.players.Length; ++i)
 				{
-					if (m_ThreatLogic.m_Threat[i] >= 0.7f && m_ThreatLogic.m_Hatred[i] > 10)
+					if (m_ThreatLogic.m_Threat[i] >= 0.7f && m_ThreatLogic.m_Hatred[i] > 30)
 					{
 						m_StateScript.m_State = ZombieStates.Run;	// Set the state to Run
 						m_MovementScript.NavMeshSpeed(m_MovementScript.m_fRunSpeed); // Go at a nice pace :^)
