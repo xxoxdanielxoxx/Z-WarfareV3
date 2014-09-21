@@ -1,0 +1,48 @@
+v 1.0.6
+
+Tweak: Caught rotation vector warning
+Tweak: Swapped load brush arrow icon for standard 'Open File' icon
+
+
+v1.0.5
+
+Fixed Bug: Scaling error when painting prefabs into groups
+Compatibility: Added Unity 4.5 compatibility
+
+New Feature: Brush templates are now saved into files instead of EditorPrefs, allowing them to be shared and compatible with version control
+New Feature: Eraser Options foldout allows the eraser to be restricted
+New Feature: Rotation Sliders now also have entry fields
+
+Tweak: QB now prevents the user from creating groups with duplicate names
+Tweak: Object randomness weight is now saved with the brush template
+Tweak: Various small tweaks were made to how the controls are placed and behave, including clearing of fields when buttons are pressed.
+
+
+v1.0.4
+
+Fixed Bug: Icon locations were hard-coded causing breakage if QB was placed in a location other than the main Assets folder
+
+New Feature: Brushes can now be saved to memory slots located at the bottom of the tool
+New Feature: Alignment axes can now be flipped with a toggle
+New Feature: Rotation Offsets now use split sliders for added control and have an easy reset button
+New Feature: A position offset option has been added. Especially handy for embedding objects in the ground
+New Feature: Paint to Layer allows you to select multiple layers instead of just one
+New Feature: A "Restore Defaults" button returns settings to default values
+
+Tweak: Scale offset fields now have an extra digit of precision
+
+
+v1.0.3
+
+Fixed Bug: Prefabs in Drag & Drop list would get duplicated at certain times.
+
+
+v1.0.2
+
+
+Fixed Bug: Namespace missing error in qb_ObjectContainer when making a build.
+
+v1.0.1
+
+
+Initial release
