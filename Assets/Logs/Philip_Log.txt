@@ -25,7 +25,7 @@ Daily Log
 													
   UPDATE: ---
 													
-  ADDDED: ---
+  ADDDED: An editor script for Josh that will place all the objects in the scene in the proper NavMesh layers.
   
   NOTES : Worked all evening with George. This build features a lot of little bug fixes for both AI and network code but I can't exactly remember what they were.																					
 													
