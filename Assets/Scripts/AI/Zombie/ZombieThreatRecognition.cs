@@ -43,4 +43,13 @@ public class ZombieThreatRecognition : MonoBehaviour
 			}
 		}
 	}
+	public void SoundDetected(Vector3 inputPosition, int inputPlayerID, float inputThreat)
+	{
+		// Function for "actions", i.e. sounds that cause threat to the zombies where:
+		// inputPosition = the sound's position
+		// inputPlayerID = the playerID of the sound
+		// inputThreat = the threat value of the sound
+		// Threat has already been calculated, so apply as you see fit
+		//Debug.Log ("sound detected. playerID: " + inputPlayerID);
+	}
 }

@@ -2,8 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum GUNTYPE
+{
+	Pistol,
+	Rifle,
+	Shotgun,
+	Sniper,
+	None,
+	Grenade
+}
+
 public class GunProperties : Photon.MonoBehaviour 
 {
+	/*
 	public enum Gun
 	{
 		Pistol,
@@ -12,8 +23,9 @@ public class GunProperties : Photon.MonoBehaviour
 		Sniper,
 		None
 	}
+	*/
 
-	private Gun m_eGun = Gun.Pistol;
+	private GUNTYPE m_eGun = GUNTYPE.Pistol;
 	private GameObject m_bulletSocket;
 	public float m_fRandomSpread = 5;
 	private int m_iNumShotgunPellets = 8;
@@ -31,18 +43,20 @@ public class GunProperties : Photon.MonoBehaviour
 	private bool m_bReloading = false;
 	public float m_fReloadTime = 2.0f;
 	
-
+	[Range (1, 100)]
+	private float m_fSoundRadius = 10.0f;
+	
 	// Use this for initialization
 	void Start ()
 	{
 		if (gameObject.tag == "Pistol")
-			m_eGun = Gun.Pistol;
+			m_eGun = GUNTYPE.Pistol;
 		else if (tag == "Shotgun")
-			m_eGun = Gun.Shotgun;
+			m_eGun = GUNTYPE.Shotgun;
 		else if (tag == "Rifle")
-			m_eGun = Gun.Rifle;
+			m_eGun = GUNTYPE.Rifle;
 		else if (tag == "Sniper")
-			m_eGun = Gun.Sniper;
+			m_eGun = GUNTYPE.Sniper;
 		
 		if (gameObject.tag == "Pistol")
 			m_iMagSize = m_iMaxPistol;
@@ -81,7 +95,7 @@ public class GunProperties : Photon.MonoBehaviour
 				//Debug.Log(GetComponent<PlayerProperties>());
 				//Debug.Log(GetComponent<PlayerProperties>().m_iID);
 
-				if (m_eGun == Gun.Shotgun)
+				if (m_eGun == GUNTYPE.Shotgun)
 				{
 
 
@@ -93,7 +107,7 @@ public class GunProperties : Photon.MonoBehaviour
 						bulletRotation.eulerAngles += new Vector3(Random.Range(-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread));
 					
 						InstantiateBullet( m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
-
+						
 						//Create Networked Bullet 
 						if(pv != null)
 							pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
@@ -101,11 +115,16 @@ public class GunProperties : Photon.MonoBehaviour
 				}
 				else
 				{
+					
 					InstantiateBullet(m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID);
 					//Create Networked Bullet
 					if(pv != null)
 						pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID );
 				}
+				
+				GameObject emitThreat = (GameObject) Instantiate(Resources.Load ("ThreatEmitter"), transform.position, transform.rotation);
+				emitThreat.GetComponent<ThreatEmitter>().SetValues(transform.position, playerID, m_fSoundRadius, m_iDamage);
+				
 				m_iAmmo--;
 				// do gun recoil
 				//MouseLook mouseLook = GetComponentInParent<MouseLook>();
@@ -173,7 +192,7 @@ public class GunProperties : Photon.MonoBehaviour
 		m_iAmmo = m_iMagSize;
 	}
 	
-	public Gun GetGunType()
+	public GUNTYPE GetGunType()
 	{
 		return m_eGun;
 	}
