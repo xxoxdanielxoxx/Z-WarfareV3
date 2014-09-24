@@ -1,6 +1,9 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+09/24/14 chg: Changed private m_fSoundRadius var to public.
+	 Green wireframe sphere in scene view represents m_fSoundRadius, the distance that firing a gun will alert a zombie.
+
 09/24/14 add: Added ThreatEmitter script. Tells zombies when a sound has been made. Added a function SoundDetected() to Philip's ZombieThreatRecognition script.
 
 09/17/14 

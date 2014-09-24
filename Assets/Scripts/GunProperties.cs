@@ -44,7 +44,7 @@ public class GunProperties : Photon.MonoBehaviour
 	public float m_fReloadTime = 2.0f;
 	
 	[Range (1, 100)]
-	private float m_fSoundRadius = 10.0f;
+	public float m_fSoundRadius = 10.0f;
 	
 	// Use this for initialization
 	void Start ()
@@ -229,5 +229,11 @@ public class GunProperties : Photon.MonoBehaviour
 			m_ItemSpawner.GetComponent<ItemSpawner>().ItemTaken();
 		}
 		Destroy (gameObject);
+	}
+	
+	void OnDrawGizmos()
+	{
+		Gizmos.color = Color.green;
+		Gizmos.DrawWireSphere(transform.position, m_fSoundRadius);
 	}
 }
