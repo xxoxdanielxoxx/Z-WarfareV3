@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerProperties : MonoBehaviour 
+public class PlayerProperties : Photon.MonoBehaviour 
 {
 	//public int m_iHealth;
 	// Use this for initialization
@@ -32,5 +32,9 @@ public class PlayerProperties : MonoBehaviour
 
 	}
 
-
+	[RPC]
+	public void NetworkSetPlayerID(int id)
+	{
+		m_iID = id;
+	}
 }

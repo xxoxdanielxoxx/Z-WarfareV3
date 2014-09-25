@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerIDManager : MonoBehaviour 
+public class PlayerIDManager : Photon.MonoBehaviour 
 {
 
 	GameObject[] m_Players;
@@ -25,8 +25,36 @@ public class PlayerIDManager : MonoBehaviour
 
 		for (int i = 0; i < m_Players.Length; ++i)
 		{
-			m_Players[i].GetComponent<PlayerProperties>().m_iID = i;	
+			PhotonView pv = m_Players[i].GetComponent<PhotonView>();
+			if (pv != null)
+			{
+				int pvID = pv.viewID /1000;
+				pvID -= 1;
+				
+				m_Players[i].GetComponent<PlayerProperties>().m_iID = pvID;	
+			}
+
 		}
+
+		if (photonView != null)
+			photonView.RPC ("NetworkActivate", PhotonTargets.Others);
+	}
+
+	[RPC]
+	public void NetworkActivate()
+	{
+		m_Players = new GameObject[4];
+		m_Players = GameObject.FindGameObjectsWithTag("Player");
+		
+		for (int i = 0; i < m_Players.Length; ++i)
+		{
+			PhotonView pv = m_Players[i].GetComponent<PhotonView>();
+			int pvID = pv.viewID /1000;
+			pvID -= 1;
+			
+			m_Players[i].GetComponent<PlayerProperties>().m_iID = pvID;	
+		}
+
 	}
 	
 	public GameObject FindPlayer(int ID)
@@ -41,6 +69,19 @@ public class PlayerIDManager : MonoBehaviour
 		Debug.LogError ("Player wasnt found");
 
 		return n;
+	}
+
+	public int FindPlayerIndex(int ID)
+	{
+		for (int i = 0; i < m_Players.Length; ++i)
+		{
+			if(m_Players[i].GetComponent<PlayerProperties>().m_iID == ID)
+				return i;
+		}
+
+		Debug.LogError("Couldnt Find Player Index");
+
+		return -1;
 	}
 
 	public GameObject[] GetALLPlayers()

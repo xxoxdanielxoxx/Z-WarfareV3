@@ -51,6 +51,9 @@ public class AIMaster : Photon.MonoBehaviour
 	public int m_iGroupCount 		= -1;	// Index of groups there are, +1 to this value for total number
 	public int m_iZombieWaveLimit 	= 0;	// CHANGE THIS! This is now how many to spawn this wave
 	public int m_iMaxActiveZomb 	= 0;	// The highest number of zombies that can be active at once
+
+	[Range(0.1f, 0.9f)]
+	public float	m_fZombieAngerThres = 0.5f;
 	
 	int m_iZombiesLeft  	= 0;	// Number of zombies left in this wave
 	int m_iActiveZombies	= -1; 	// How many zombies are wandering around
@@ -117,6 +120,7 @@ public class AIMaster : Photon.MonoBehaviour
 		players = new GameObject[4];
 		players = PlayerIDManager.Get ().GetALLPlayers ();
 
+
 		m_SpawnNow = true;
 		m_fSpawnCD = m_fSpawnDownTime;
 
@@ -132,6 +136,7 @@ public class AIMaster : Photon.MonoBehaviour
 		{
 			m_Zombs[i] = (ZombieAI)((GameObject)GameObject.Instantiate(m_ZombieStd, nonActiveSpawn, Quaternion.identity)).GetComponent("ZombieAI");
 			m_Zombs[i].m_iMasterID = i;
+			m_Zombs[i].SetThreatThreashold(m_fZombieAngerThres);
 		}
 
 		if(!m_bOFFLINEMODE)

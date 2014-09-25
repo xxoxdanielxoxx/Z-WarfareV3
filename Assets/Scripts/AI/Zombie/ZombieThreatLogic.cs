@@ -3,10 +3,12 @@ using System.Collections;
 
 public class ZombieThreatLogic : MonoBehaviour 
 {
+
+
 	public bool 	m_AggrOn;
 
 	// Threat tracking
-	public uint[] 	m_Hatred = new uint[8];	// 0-3 are the players, 4 is the enviroment aggro
+	public uint[] 	m_Hatred = new uint[8];	// 0-3 are the players, 4+ is the enviroment aggro
 	public float[]	m_Threat = new float[8];
 	public byte		m_TargetIdx;	// Index of the highest threat target. 100 if there is no target
 
@@ -22,19 +24,23 @@ public class ZombieThreatLogic : MonoBehaviour
 
 	public void Reset()
 	{
-		// Set up threat system
-		for (int i = 0; i < 8;  ++i) 
+		// Set up HATE system
+		for (int i = 0; i < 4;  ++i) 
 		{
+			// Default player hate is 1
 			m_Hatred[i] = 1;
 		}
-		m_Hatred[7] = 0;
+		for (int i = 0; i < 4;  ++i) 
+		{
+			// Default enviromental hate is 0
+			m_Hatred[i+4] = 0;
+		}
 
-		// Set up threat system
+		// Set up THREAT system
 		for (int i = 0; i < 8;  ++i) 
 		{
 			m_Threat[i] = 0;
 		}
-		m_Threat[7] = 0;
 		
 		m_TargetIdx = 100;
 		m_AggrOn = false;
@@ -44,10 +50,12 @@ public class ZombieThreatLogic : MonoBehaviour
 	{
 		m_Hatred [_pIdx] += _hate;
 
+		Debug.Log("The spooky guy is player "+_pIdx);
+
 		CalculateThreat ();
 	}
 
-	public void CalculateThreat()
+	public void CalculateThreat() // Potato: Does this even count up grenade threat? 
 	{
 		uint threatSum = 0;
 		

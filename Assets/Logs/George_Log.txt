@@ -13,6 +13,9 @@ Daily Log
 -------------------------------------------------------------------------------------------------
 
 
+9/22/14         BUG: SOund Instatinationtion Emmitter is NOT network Safe it is Comminted out, I will fix this
+		Chng: Player IDs are now View IDS
+
 
 9/17/14		update: EXE now works as HOST
 		chng: unnessary Photon ID function in spawning local player

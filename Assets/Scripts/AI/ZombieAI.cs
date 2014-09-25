@@ -17,6 +17,8 @@ public class ZombieAI : MonoBehaviour
 	ZombieThreatLogic		m_ThreatLogic;
 	ZombieThreatRecognition	m_ThreatRecon;
 
+
+	float m_fThreatThreashold = 0.7f;
 	[HideInInspector]
 	public int m_iMasterID;
 
@@ -43,6 +45,12 @@ public class ZombieAI : MonoBehaviour
 	public ZombieThreatRecognition GetThreatRec()
 	{
 		return m_ThreatRecon;
+	}
+
+
+	public void SetThreatThreashold(float t)
+	{
+		m_fThreatThreashold = t;
 	}
 
 
@@ -88,14 +96,14 @@ public class ZombieAI : MonoBehaviour
 	{
 		Vector3 avgPos = Vector3.zero;	// Start at (0,0,0)
 
-		if (GroupAI.m_Master.players.Length == 1)
-			return GroupAI.m_Master.players [0].transform.position;
+		if (AIMaster.m_Reference.players.Length == 1)
+			return AIMaster.m_Reference.players [0].transform.position;
 
-		for (int i = 0; i < GroupAI.m_Master.players.Length; ++i)
+		for (int i = 0; i < AIMaster.m_Reference.players.Length; ++i)
 		{
-			avgPos += GroupAI.m_Master.players[i].transform.position;	// Get a summation of all the player pos
+			avgPos += AIMaster.m_Reference.players[i].transform.position;	// Get a summation of all the player pos
 		}
-		avgPos /= (GroupAI.m_Master.players.Length);	// Divide by the number of players
+		avgPos /= (AIMaster.m_Reference.players.Length);	// Divide by the number of players
 
 		return avgPos;	// And this is the average
 	}
@@ -152,7 +160,7 @@ public class ZombieAI : MonoBehaviour
 				// Divide the sumation to get the percent of hate a player has, which will directly translate to threat
 				for (byte i = 0; i < GroupAI.m_Master.players.Length; ++i)
 				{
-					if (m_ThreatLogic.m_Threat[i] >= 0.7f && m_ThreatLogic.m_Hatred[i] > 30)
+					if (m_ThreatLogic.m_Threat[i] >= m_fThreatThreashold && m_ThreatLogic.m_Hatred[i] > 30)
 					{
 						m_StateScript.m_State = ZombieStates.Run;	// Set the state to Run
 						m_MovementScript.NavMeshSpeed(m_MovementScript.m_fRunSpeed); // Go at a nice pace :^)

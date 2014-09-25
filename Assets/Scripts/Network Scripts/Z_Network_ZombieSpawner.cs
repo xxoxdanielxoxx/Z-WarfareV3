@@ -57,7 +57,6 @@ public class Z_Network_ZombieSpawner : Photon.MonoBehaviour
 
 			//Transmit the Clients the ID, and have them Spawn the Zombies
 			//NOTE ADD TYPE
-			Debug.Log("Sending RPC ");
 			photonView.RPC("SpawnRemoteZombiesNetwork", PhotonTargets.OthersBuffered, pos, rot, id1);
 		}
 	}

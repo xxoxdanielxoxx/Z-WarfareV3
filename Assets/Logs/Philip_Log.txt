@@ -30,3 +30,20 @@ Daily Log
   NOTES : Worked all evening with George. This build features a lot of little bug fixes for both AI and network code but I can't exactly remember what they were.																					
 													
 ---------------------------------------------------------------------------------------------------------
+
+					-=-= 9/24/14 =-=-
+---------------------------------------------------------------------------------------------------------
+  BUGFIX: 
+		-Zombies now know which player shot them and caused threat
+		-Players now initialize threat lists taking enviromental aggro into count (Still need run time logic)
+		-Zombies can find the mid point between all players without a reference to a group
+													
+  UPDATE: ---
+													
+  ADDDED: 
+		-Threshold parameter for the threat to aggro a zombie
+		-Zombie can get threat from a player within a distance
+  
+  NOTES : Happy break everyone =)																					
+													
+---------------------------------------------------------------------------------------------------------
