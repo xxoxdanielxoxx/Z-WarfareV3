@@ -97,13 +97,13 @@ public class WeaponManager : MonoBehaviour
 			Transform closestGun = FindClosestGun();
 			if (closestGun)
 			{
-				GUNTYPE m_eTempGun = closestGun.GetComponent<GunProperties>().GetGunType();
+				GUNTYPE tempGun = closestGun.GetComponent<GunProperties>().GetGunType();
 				GUNTYPE otherGun;
-				if (m_eTempGun == GUNTYPE.Pistol)
+				if (tempGun == GUNTYPE.Pistol)
 					otherGun = GUNTYPE.Pistol;
-				else if (m_eTempGun == GUNTYPE.Shotgun)
+				else if (tempGun == GUNTYPE.Shotgun)
 					otherGun = GUNTYPE.Shotgun;
-				else if (m_eTempGun == GUNTYPE.Rifle)
+				else if (tempGun == GUNTYPE.Rifle)
 					otherGun = GUNTYPE.Rifle;
 				else
 					otherGun = GUNTYPE.Sniper;
@@ -297,18 +297,18 @@ public class WeaponManager : MonoBehaviour
 	{
 		// this function is for finding the closest valid gun to pick up
 		// we need to do two things: get a list of closeby guns that ARE NOT currently in the player inventory, then find out which gun in the list is closest
-		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 3.2f, LayerMask.GetMask("PickupLayer"));
+		Collider[] pickupColliders = Physics.OverlapSphere(transform.position, 3.2f, LayerMask.GetMask("PickupLayer"));
 		// 3.2 is a size based on the current size of the Pickup colliders as of 9-4-14
 		m_availablePickups.Clear();
 		GUNTYPE otherGun;
-		foreach (Collider weapon in m_pickupColliders)
+		foreach (Collider weapon in pickupColliders)
 		{
-			GUNTYPE m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
-			if (m_eTempGun == GUNTYPE.Pistol)
+			GUNTYPE tempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+			if (tempGun == GUNTYPE.Pistol)
 				otherGun = GUNTYPE.Pistol;
-			else if (m_eTempGun == GUNTYPE.Shotgun)
+			else if (tempGun == GUNTYPE.Shotgun)
 				otherGun = GUNTYPE.Shotgun;
-			else if (m_eTempGun == GUNTYPE.Rifle)
+			else if (tempGun == GUNTYPE.Rifle)
 				otherGun = GUNTYPE.Rifle;
 			else
 				otherGun = GUNTYPE.Sniper;
@@ -330,34 +330,34 @@ public class WeaponManager : MonoBehaviour
 		if (m_availablePickups.Count > 0)
 		{
 			// with this list, we need to find out which gun is the closest to the player
-			Collider m_closestPickup = m_availablePickups[0];
-			float m_fShortestDistance = Vector3.Distance(transform.position, m_closestPickup.transform.position);
+			Collider closestPickup = m_availablePickups[0];
+			float m_fShortestDistance = Vector3.Distance(transform.position, closestPickup.transform.position);
 			
 			foreach (Collider weapon in m_availablePickups)
 			{
 				if (Vector3.Distance(transform.position, weapon.transform.position) < m_fShortestDistance)
-					m_closestPickup = weapon;
+					closestPickup = weapon;
 			}
-			return m_closestPickup.transform.parent;
+			return closestPickup.transform.parent;
 		}
 		return null;
 	}
 	
 	private void GetAmmo()
 	{
-		Collider[] m_pickupColliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("PickupLayer"));
+		Collider[] pickupColliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("PickupLayer"));
 		GUNTYPE otherGun;
-		foreach (Collider weapon in m_pickupColliders)
+		foreach (Collider weapon in pickupColliders)
 		{
 			if (weapon.GetComponentInParent<GunProperties>())
 			{
 				// this is checking to see if there is indeed a GunProperties script on the pickup object
-				GUNTYPE m_eTempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
-				if (m_eTempGun == GUNTYPE.Pistol)
+				GUNTYPE tempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+				if (tempGun == GUNTYPE.Pistol)
 					otherGun = GUNTYPE.Pistol;
-				else if (m_eTempGun == GUNTYPE.Shotgun)
+				else if (tempGun == GUNTYPE.Shotgun)
 					otherGun = GUNTYPE.Shotgun;
-				else if (m_eTempGun == GUNTYPE.Rifle)
+				else if (tempGun == GUNTYPE.Rifle)
 					otherGun = GUNTYPE.Rifle;
 				else
 					otherGun = GUNTYPE.Sniper;

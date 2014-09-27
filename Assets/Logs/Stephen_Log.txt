@@ -1,6 +1,10 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+09/26/14
+	chg: Changed script where temporary variables were erroneously declared with "m_" notation, turned on ItemSpawner objects in scene.
+	
+
 09/24/14 chg: Changed private m_fSoundRadius var to public.
 	 Green wireframe sphere in scene view represents m_fSoundRadius, the distance that firing a gun will alert a zombie.
 
