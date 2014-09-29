@@ -18,8 +18,7 @@ public class AmmoManager : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
 	{
-		if (GetComponent<GunProperties>().GetItemSpawner() &&
-			m_iAmmo <= 0)
+		if (GetComponent<GunProperties>().GetItemSpawner() && m_iAmmo <= 0)
 			GetComponent<GunProperties>().GunPickupTaken();
 	}
 	
@@ -59,6 +58,7 @@ public class AmmoManager : MonoBehaviour
 			}
 			else
 			{
+				// grab all the available bullets from the pickup, tell the pickup it's empty
 				m_iAmmo += otherAmmo.GetAmmo();
 				otherAmmo.SetAmmo(0);
 			}
@@ -75,6 +75,7 @@ public class AmmoManager : MonoBehaviour
 			else
 			{
 				m_iAmmo += otherAmmo.GetAmmo();
+				// grab all the available bullets from the pickup, tell the pickup it's empty
 				otherAmmo.SetAmmo(0);
 			}
 		}
@@ -90,6 +91,7 @@ public class AmmoManager : MonoBehaviour
 			else
 			{
 				m_iAmmo += otherAmmo.GetAmmo();
+				// grab all the available bullets from the pickup, tell the pickup it's empty
 				otherAmmo.SetAmmo(0);
 			}
 		}
@@ -105,6 +107,7 @@ public class AmmoManager : MonoBehaviour
 			else
 			{
 				m_iAmmo += otherAmmo.GetAmmo();
+				// grab all the available bullets from the pickup, tell the pickup it's empty
 				otherAmmo.SetAmmo(0);
 			}
 		}

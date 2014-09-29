@@ -1,14 +1,28 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+09/29/14
+	add: DistrictProperties, DistrictManager, new tags, new district blocker in scene
+	chg: The soldier in level02 with animation is tagged Player and has DistrictProperties added to test DistrictManager
+	chg: Messed with ZombieAI and Spawner scripts. Added comments where new code was added, also refer to Asana>District Logic.	
+	chg: Changed Hide Mouse bind to F1, and commented out Start() behavior. The hide mouse commands do not play well with Start(). In addition, Esc does not play well with script because Esc is also Unity's "Escape Game Window" button.
+	chg: Zombie prefabs now have DistrictProperties script added.
+	Proof-of-concept district colliders are in scene, double buildings signify district boundaries.
+	Players and zombies walking through districts will cause their DistrictProperties.m_district to change.
+	Get to wave 3 to remove blocker to get to district three.
+	Look at GameManager and see timer tick down for item drop. The two players in scene are the player and the animated soldier. Moving to district 2 or 3 will pause the timer, since not every player is in the same district.
+	
+
 09/26/14
 	chg: Changed script where temporary variables were erroneously declared with "m_" notation, turned on ItemSpawner objects in scene.
 	
 
-09/24/14 chg: Changed private m_fSoundRadius var to public.
-	 Green wireframe sphere in scene view represents m_fSoundRadius, the distance that firing a gun will alert a zombie.
+09/24/14 
+	chg: Changed private m_fSoundRadius var to public.
+	Green wireframe sphere in scene view represents m_fSoundRadius, the distance that firing a gun will alert a zombie.
 
-09/24/14 add: Added ThreatEmitter script. Tells zombies when a sound has been made. Added a function SoundDetected() to Philip's ZombieThreatRecognition script.
+09/24/14 
+	add: Added ThreatEmitter script. Tells zombies when a sound has been made. Added a function SoundDetected() to Philip's ZombieThreatRecognition script.
 
 09/17/14 
 	chg: Fixed an error case where the GetAmmo() function from the WeaponManager script would be called on a medkit, due to the PickupLayer logic. Now checks to make sure there is a GunProperties component on object.

@@ -122,7 +122,28 @@ public class ZombieAI : MonoBehaviour
 		if (m_ThreatLogic.enabled)
 			m_ThreatLogic.Reset();
 	}
-
+	
+	// =================== Here's the code Stephen added ==========================
+	// The reason why I did this is because the zombie gets reference to which district it is rebirthed in by asking 
+	// the spawner what district the spawnwer is in, and so Rebirth() needs reference to the spawner's DistrictProperties
+	public void Rebirth(DistrictProperties.District input)
+	{
+		// Init stats
+		m_HealthScript.m_iHealth = 99;
+		
+		if (m_StateScript.enabled)
+			m_StateScript.Reset();
+		
+		if (m_MovementScript.enabled)
+			m_MovementScript.Reset (PlayerPositionMiddle());
+		
+		if (m_ThreatLogic.enabled)
+			m_ThreatLogic.Reset();
+			
+		GetComponent<DistrictProperties>().SetDistrict(input);
+	}
+	// =================== Here's the code Stephen added ==========================
+	
 	public void Redeath()
 	{
 		transform.position = new Vector3 (0,-15f, 0);

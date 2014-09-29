@@ -172,6 +172,7 @@ public class GunProperties : Photon.MonoBehaviour
 				else
 				{
 					m_iAmmo = m_ammoManager.GetAmmo();
+					// take all available bullets, tell ammoManager that it is empty
 					m_ammoManager.SetAmmo(0);
 				}
 			}
@@ -237,6 +238,8 @@ public class GunProperties : Photon.MonoBehaviour
 	void OnDrawGizmos()
 	{
 		Gizmos.color = Color.green;
-		Gizmos.DrawWireSphere(transform.position, m_fSoundRadius);
+		// this is checking to see if was dropped from an item spawner, therefore it's not in a player's hands and doesn't make any potential noise
+		if (!m_ItemSpawner)
+			Gizmos.DrawWireSphere(transform.position, m_fSoundRadius);
 	}
 }

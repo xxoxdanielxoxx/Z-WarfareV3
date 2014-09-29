@@ -7,14 +7,14 @@ public class HideMouse : MonoBehaviour
 	// Use this for initialization
 	void Start () 
 	{
-		Screen.lockCursor = true;
-		Screen.showCursor = false;
+		//Screen.lockCursor = true;
+		//Screen.showCursor = false;
 	}
 	
 	// Update is called once per frame
 	void Update () 
 	{
-		if (Input.GetKeyDown (KeyCode.Escape))
+		if (Input.GetKeyDown (KeyCode.F1))
 		{
 			if (Screen.showCursor)
 			{

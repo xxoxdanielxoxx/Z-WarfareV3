@@ -92,7 +92,13 @@ public class Spawner : MonoBehaviour
 		}
 
 		m_Master.m_Zombs[_i].gameObject.transform.position = this.gameObject.transform.position;
-
-		m_Master.m_Zombs[_i].Rebirth();
+		
+		
+		// =================== Here's the code Stephen added ==========================
+		
+		//m_Master.m_Zombs[_i].Rebirth();
+		
+		m_Master.m_Zombs[_i].Rebirth(GetComponent<DistrictProperties>().GetDistrict());
+		// =================== Here's the code Stephen added ==========================
 	}
 }
