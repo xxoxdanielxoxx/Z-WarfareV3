@@ -17,9 +17,12 @@ public class AIMaster : Photon.MonoBehaviour
 	/// IF it is Checked You are in DEBUG MODE and its NOT NETWORKED/// </summary>
 	public bool m_bOFFLINEMODE = true;
 	private bool m_bIsActive = false; 
-	// Varibles I should get from GameManager later
+
 	public GameObject[] players;
 	public int wave;
+
+	private byte[] districtCount;
+	private byte[] maxDistrictCount;
 
 	// A static reference to this class incase it is needed by any other script
 	public static AIMaster m_Reference;
@@ -30,17 +33,29 @@ public class AIMaster : Photon.MonoBehaviour
 	public GameObject	m_ZombieCom;	// Commander zombie
 	public GameObject	m_ZombieTnk;	// Tank zombie
 
-	// Spawner varibles
+	// Spawner behavioural varibles
 	public int 	 m_iSpawnLimitMax; 	// Maximum number of zombies a spawner can spawn
 	public int 	 m_iSpawnLimitMin;	// Minimum number of zombies a spawner can spawn
 	public int 	 m_fSpawnDist;		// How far away the spawner can be before it is disregarded for use (If no spawner is in range than waves will increment quickly. POTATO!)
 	public float m_fSpawnWaveMult;	// Multipler to the number range of how many zombies can be spawned this wave
-	public float m_fSpawnDownTime;	// After a spawner revives a zombie, how long to wait until another zombie is spawned
 
+	// Spawner/Wave logical parameters
+	[Range (0.1f, 10.0f)]
+	public float	m_fWaveDelay = 2.5f;	// How much time inbetween waves
 
+	[Range (0.1f, 5.0f)]
+	public float 	m_fSpawnDelay = 1.0f;	// How long until the spawners reactivates
 
 	[HideInInspector]
 	public bool m_SpawnNow;
+	
+	private float	m_fWaveTimer;	// This will tick down to the next wave
+	private float	m_fSpawnTimer;	// This will tick down to the next spawning group
+
+	private bool	m_bWaveCD;		// If true than start the timer to start the next wave
+	private bool	m_bSpawnCD;		// If true than start the timer to start spawning the next set of zombies
+	
+
 
 	// Group varibles
 	public int m_iGroupLimit;		// How many zombies can be in each group at max
@@ -54,13 +69,13 @@ public class AIMaster : Photon.MonoBehaviour
 
 	[Range(0.1f, 0.9f)]
 	public float	m_fZombieAngerThres = 0.5f;
+
+
 	
 	int m_iZombiesLeft  	= 0;	// Number of zombies left in this wave
 	int m_iActiveZombies	= -1; 	// How many zombies are wandering around
 
 	uint m_ZombieBits 		= 0;	// These bits represent which zombies are alive
-
-	float	m_fSpawnCD;		// How long until this spawner can spawn another zombie
 
 	// Data arrays and lists
 	public List<GroupAI> m_Groups = new List<GroupAI>();
@@ -97,7 +112,7 @@ public class AIMaster : Photon.MonoBehaviour
 	{
 		if (m_bOFFLINEMODE) 
 		{
-			StartCoroutine(SpawnZombies())	;
+			StartCoroutine(StartAI())	;
 
 		}
 	}
@@ -107,7 +122,7 @@ public class AIMaster : Photon.MonoBehaviour
 	/// <summary>
 	/// Awake this instance. Initialize any internal varible that I will need to track
 	/// </summary>
-	public IEnumerator SpawnZombies()
+	public IEnumerator StartAI()
 	{
 		yield return new WaitForSeconds (5); // HACK FIX!!!! DO IT THE CORRECT WAY!!!!!
 
@@ -115,14 +130,18 @@ public class AIMaster : Photon.MonoBehaviour
 			m_Reference = this;
 
 
-
 		PlayerIDManager.Get().Activate();
 		players = new GameObject[4];
+		districtCount = new byte[4];
+		maxDistrictCount = new byte[4];
 		players = PlayerIDManager.Get ().GetALLPlayers ();
 
 
-		m_SpawnNow = true;
-		m_fSpawnCD = m_fSpawnDownTime;
+		m_SpawnNow 		= false;
+		m_bSpawnCD 		= false;
+		m_bWaveCD 		= true;
+		m_fSpawnTimer	= m_fSpawnDelay;
+		m_fWaveTimer  	= m_fWaveDelay;
 
 		// Start by initizaling the groups
 		GroupAI.FindMaster(this);
@@ -140,7 +159,7 @@ public class AIMaster : Photon.MonoBehaviour
 		}
 
 		if(!m_bOFFLINEMODE)
-			Z_Network_ZombieSpawner.Get ().SummonRemoteZombies ();
+			Z_Network_ZombieSpawner.Get().SummonRemoteZombies();
 
 		//Activate all the Spanwnners now that AI Master is ready
 
@@ -219,12 +238,23 @@ public class AIMaster : Photon.MonoBehaviour
 	public void ZombieDeath(int _deadID)
 	{
 		--m_iZombiesLeft;
+		--m_iActiveZombies;
 
 		uint mask = 0xFFFFFFFE;
 		mask = (mask << _deadID) | (mask >> (32 - _deadID));	// Rotate the bits so the 0 bit is in the right place
 
 		m_ZombieBits = m_ZombieBits & mask;	// Set the correct zombie as dead
 		m_Zombs [_deadID].Redeath ();	// Zombie can now start really being dead
+
+		if (m_iZombiesLeft <= 0)	// Killed the last thing in the wave
+		{
+			m_bSpawnCD  = false;
+			m_bWaveCD 	= true;
+		}
+		else 	// Wave still going on!
+		{
+			m_bSpawnCD = true;
+		}
 	}
 
 	#endregion
@@ -245,22 +275,31 @@ public class AIMaster : Photon.MonoBehaviour
 				return;
 		}
 
-		// Check if the wave is completed and a new one will have to be generated
-		if (m_iZombiesLeft <= 0)
+		// Check if the delay between waves is completed and a new one will have to be generated
+		if (m_fWaveTimer <= 0)
 		{
 			// Up the wave count and ready spawn related data
 			++wave;
-			m_SpawnNow = false;
-		}
+	
+			m_iZombieWaveLimit = wave*50;
+			m_iZombiesLeft = m_iZombieWaveLimit;
+			m_iActiveZombies = 0;
+			m_fWaveTimer = m_fWaveDelay;
 
-	SpawningUpdate:
+			m_SpawnNow = true;
+			m_bWaveCD = false;
+		}
 
 		if (m_SpawnNow)
 		{
+			if (m_iActiveZombies >= m_iZombiesLeft)
+			{
+				m_SpawnNow = false;
+				return;
+			}
+
 			if (m_ZombieBits < uint.MaxValue)	// If any zombie has be marked as dead, go through the zombie bits and figure which one is dead. Then revive
 			{
-				if ((m_iActiveZombies+1) > m_iZombieWaveLimit)
-					goto OtherUpdates;
 
 				uint mask = 0x00000001;
 
@@ -282,64 +321,22 @@ public class AIMaster : Photon.MonoBehaviour
 		}
 		else // Can't spawn just now, count down the wave delay timer
 		{
-			if (true)	// Potato: Later this will be the timer check to seperate waves
+			if (m_iActiveZombies == 0 && m_bWaveCD == false)
+				m_bSpawnCD = true;
+
+			if (m_bSpawnCD)
+				m_fSpawnTimer -= Time.deltaTime;
+
+			if (m_bWaveCD)
+				m_fWaveTimer -= Time.deltaTime;
+
+			if (m_fSpawnTimer < 0.0f)
 			{
 				m_SpawnNow = true;
-				m_iZombieWaveLimit = wave*10;
-				m_iZombiesLeft = m_iZombieWaveLimit;
-				m_iActiveZombies = 0;
+				m_bSpawnCD = false;
+				m_fSpawnTimer = m_fSpawnDelay;
 			}
 		}
-
-	OtherUpdates:
-
-		// ::: DEBUG TEST ::: 
-		// Press 1-4 to raise the threat of that player to all living zombies by 10
-		if (Input.GetKeyDown(KeyCode.Alpha1))
-		{
-			for (int i = 0; i < 32; ++i)
-			{
-				if (m_Zombs[i].Health > -1)
-				{
-					m_Zombs[i].DEBUG_ADD_THREAT(0, 10);
-				}
-			}
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha2))
-		{
-			for (int i = 0; i < 32; ++i)
-			{
-				if (m_Zombs[i].Health > -1)
-				{
-					m_Zombs[i].DEBUG_ADD_THREAT(1, 10);
-				}
-			}
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha3))
-		{
-			for (int i = 0; i < 32; ++i)
-			{
-				if (m_Zombs[i].Health > -1)
-				{
-					m_Zombs[i].DEBUG_ADD_THREAT(2, 10);
-				}
-			}
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha4))
-		{
-			for (int i = 0; i < 32; ++i)
-			{
-				if (m_Zombs[i].Health > -1)
-				{
-					m_Zombs[i].DEBUG_ADD_THREAT(3, 10);
-				}
-			}
-		}
-		if (Input.GetKeyDown(KeyCode.Alpha9))
-		{
-			m_Groups[0].RemoveZombie(m_Groups[0].m_Zombie[1]);
-		}
-		// :::
 	}
 
 	// Handle all the movement Updates here
@@ -347,7 +344,7 @@ public class AIMaster : Photon.MonoBehaviour
 	{
 		for (int i = 0; i < m_Groups.Count; ++i) // Update every group
 		{
-			m_Groups[i].UpdateGroup();
+			m_Groups[i].UpdateGroup();	// I actually don't think this is being used right now. Consider what I can use a group's center point for
 		}
 	
 	}

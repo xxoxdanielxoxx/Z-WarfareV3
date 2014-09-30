@@ -47,3 +47,20 @@ Daily Log
   NOTES : Happy break everyone =)																					
 													
 ---------------------------------------------------------------------------------------------------------
+
+					-=-= 9/29/14 =-=-
+---------------------------------------------------------------------------------------------------------
+  BUGFIX: 
+		-Zombie can calculate threat for grenades and other hazards
+		-Zombies now leave their group on death
+													
+  UPDATE:
+		-Changed SpawnZombies() function in AIMaster to StartAI(). I feel this better represents what the function does
+													
+  ADDDED: 
+  		-A timed delay for both waves and spawners
+		-Zombie now actively seek out other zombies when they aren't close to allies.
+  
+  NOTES : Started up on some of the stuff Stephan needed. Will need to keep working on it. Threw in the arrays for district based zombie pools. Need to flesh out the logic for using the spawners for it though										
+													
+---------------------------------------------------------------------------------------------------------

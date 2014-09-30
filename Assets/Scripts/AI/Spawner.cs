@@ -32,8 +32,6 @@ public class Spawner : MonoBehaviour
 
 	public void Activate()
 	{
-
-
 		m_fGridResW = 1.2f;
 		m_fGridResH = 1.2f;
 

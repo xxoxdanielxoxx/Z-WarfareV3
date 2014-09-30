@@ -156,7 +156,7 @@ public class Z_Netowork_PlayerSpawner : Photon.MonoBehaviour
 			SpawnLocalPlayer();
 
 			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-			StartCoroutine( m.SpawnZombies());
+			StartCoroutine( m.StartAI());
 		}
 	}
 }

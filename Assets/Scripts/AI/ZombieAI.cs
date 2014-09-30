@@ -110,6 +110,8 @@ public class ZombieAI : MonoBehaviour
 
 	public void Rebirth()
 	{
+		m_Group = null;
+
 		// Init stats
 		m_HealthScript.m_iHealth = 99;
 
@@ -146,6 +148,9 @@ public class ZombieAI : MonoBehaviour
 	
 	public void Redeath()
 	{
+		if (m_Group != null)
+			m_Group.RemoveZombie(this);
+
 		transform.position = new Vector3 (0,-15f, 0);
 
 		if (m_MovementScript.enabled)
@@ -221,15 +226,21 @@ public class ZombieAI : MonoBehaviour
 				//   Stay within sight of the group, but try to hide from the player and try to get in range of other zombies
 
 				AIMaster master = AIMaster.m_Reference;
+				ZombieAI zomb = null;
+
+				// These varibles only really matter in the if the zombie is too far away to make a group case
+				ZombieAI cZomb = null;	// Zombie closest to this zombie
+				float cDist = float.MaxValue;	// The distance to the closest zombie
+				float dist  = float.MaxValue;	// Distance to the zombie we're checking
 
 				// Figure out what I want to do to have this zombie find another group
 				for (int i = 0; i < 32; ++i)
 				{
 					if ( master.IsZombieAlive(i))	// The zombie we're checking is alive
 					{
-						ZombieAI zomb = master.m_Zombs[i];
+						zomb = master.m_Zombs[i];
 
-						if ((zomb.transform.position - this.transform.position).magnitude < 30)	// The two zombies are in a close distance of each other. Group up
+						if ((zomb.transform.position - this.transform.position).magnitude < 60)	// The two zombies are in a close distance of each other. Group up
 						{
 							if (zomb.m_Group == null)	// The zombie we're checking doesn't have a group
 							{
@@ -269,13 +280,27 @@ public class ZombieAI : MonoBehaviour
 							}
 							m_StateScript.m_State = ZombieStates.Wander;	// Something got added to a group so stop looking!
 						}
+						else 	// Zombie isn't close enough to group up. But maybe if I can't find anyone to group up with them then I can still join this zombie
+						{
+							dist = (zomb.transform.position - this.transform.position).magnitude;
+
+							if (dist < cDist)
+							{
+								cZomb = zomb;
+								dist  = cDist;
+							}
+						}
 					}
 
 					if (master.ZombiesActive <= i-1)
 					{
 						break;
 					}
-				}
+				}	// End of for loop going through every zombie
+
+				// If there was no zombie around me to group up with then just move to the closest zombie
+				if (cZomb != null)
+					m_MovementScript.agent.SetDestination(cZomb.transform.position);
 			}
 		}
 	}
