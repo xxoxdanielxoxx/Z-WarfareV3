@@ -7,12 +7,16 @@ public class ThreatEmitter : MonoBehaviour
 	private Vector3 m_position;
 	private int m_iPlayerID;
 	private int m_iBaseThreat;
+	private bool m_valuesSet = false;
 	
 	// Update is called once per frame
 	void FixedUpdate () 
 	{
-		DetectZombies();
-		Destroy (gameObject);
+		if (m_valuesSet)
+		{
+			DetectZombies();
+			Destroy (gameObject);
+		}
 	}
 	
 	public void SetValues(Vector3 inputPosition, int inputPlayerID, float inputRadius, int inputDamage)
@@ -21,6 +25,7 @@ public class ThreatEmitter : MonoBehaviour
 		m_iPlayerID = inputPlayerID;
 		m_fRadius = inputRadius;
 		m_iBaseThreat = inputDamage;
+		m_valuesSet = true;
 	}
 	
 	void DetectZombies()

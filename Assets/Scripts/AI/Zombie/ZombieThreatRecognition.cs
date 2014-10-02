@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class ZombieThreatRecognition : MonoBehaviour 
@@ -11,17 +11,18 @@ public class ZombieThreatRecognition : MonoBehaviour
 		m_behaviour  = _zombAI;
 		m_logic = _zombAI.GetThreatLogic ();
 	}
-
-	public void OnTriggerEnter(Collider _other)
+	
+	// this used to be OnTriggerEnter(Collider _other), now a function that is run by the bullet upon collision
+	// needed to be a function because Stephen is bad at programming, code within functionhas not been changed -Stephen
+	public void HitByBullet(GameObject _other)
 	{
-
 		if (_other.tag == "Bullet")
 		{
 			Bullet bullet = _other.GetComponent<Bullet>();
 			if (bullet != null)
 			{
 				int pIdx = PlayerIDManager.Get().FindPlayerIndex( bullet.GetPlayerID());
-		
+				
 				if (!m_behaviour.GetHealth().TakeDamage(bullet.GetDamage()))
 				{
 					// Zombie is dead

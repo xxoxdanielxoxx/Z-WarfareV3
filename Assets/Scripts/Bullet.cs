@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Bullet : MonoBehaviour 
@@ -27,8 +27,8 @@ public class Bullet : MonoBehaviour
 	void Start ()
 	{
 		tag = "Bullet";
-		// automatically destroy the bullet after 3 seconds. a bullet still hasn't hit anything
-		// after 3 seconds of travel time, something has gone wrong
+		// automatically destroy the bullet after 2 seconds. a bullet still hasn't hit anything
+		// after 2 seconds of travel time, something has gone wrong
 		Destroy (gameObject, 2);
 	}
 	
@@ -50,6 +50,11 @@ public class Bullet : MonoBehaviour
 			if (m_fDistanceTraveled >= m_fBulletRange)
 			{
 				Destroy (gameObject);
+			}
+			if (m_rHit.transform && m_rHit.transform.GetComponent<ZombieHealth>())
+			{
+				// we hit a zombie
+				m_rHit.transform.GetComponent<ZombieThreatRecognition>().HitByBullet(this.gameObject);
 			}
 		//}
 //		else

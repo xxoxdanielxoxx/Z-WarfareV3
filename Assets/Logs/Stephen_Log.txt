@@ -1,6 +1,13 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+10/02/14
+	chg: Refactored scripts, increased some readability
+	chg: Unfortnuately had to mess with Philip's Zombie scripts again, ZombieThreatRecognition
+	Had problems with bullets having a collider: player would sometimes collide with bullet, causing erratic movement.
+	Changed ZombieThreatRecognition to have a public function that bullet would run upon colliding with a zombie
+	Bullet script still a bit of a mess, will have TODO: make bullet collide with environment instead of phasing through everything
+
 09/29/14
 	add: DistrictProperties, DistrictManager, new tags, new district blocker in scene
 	chg: The soldier in level02 with animation is tagged Player and has DistrictProperties added to test DistrictManager

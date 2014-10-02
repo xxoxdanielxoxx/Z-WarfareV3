@@ -78,7 +78,7 @@ public class GunProperties : Photon.MonoBehaviour
 		if (Input.GetKeyDown (KeyCode.R))
 			if (!m_bReloading)
 				StartCoroutine(Reload());
-		// just realized that this can cause pickups on the ground to "reload", but doesn't matter as the gun is destroyed and a new one is instantiated
+		// just realized that this can cause pickups on the ground to "reload", but doesn't matter as the gun is destroyed and a new one is instantiated, so it shouldn't become an issue
 	}
 	
 	public void Shoot()
@@ -91,40 +91,21 @@ public class GunProperties : Photon.MonoBehaviour
 				int playerID =  transform.root.GetComponent<PlayerProperties>().m_iID;
 				PhotonView pv = transform.root.GetComponent<PhotonView>();
 
-
-				//Debug.Log(GetComponent<PlayerProperties>());
-				//Debug.Log(GetComponent<PlayerProperties>().m_iID);
-
 				if (m_eGun == GUNTYPE.Shotgun)
 				{
-
-
-					//Transform bulletTrajectory = m_GBulletSocket.transform;
-					//Quaternion bulletRotation = m_bulletSocket.transform.rotation;
 					for (int i = 0; i < m_iNumShotgunPellets; i++) 
 					{
-						Quaternion bulletRotation = new Quaternion(m_bulletSocket.transform.rotation.x, m_bulletSocket.transform.rotation.y, m_bulletSocket.transform.rotation.z, m_bulletSocket.transform.rotation.w);
-						bulletRotation.eulerAngles += new Vector3(Random.Range(-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread));
-					
-						InstantiateBullet( m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
-						
-						//Create Networked Bullet 
-						if(pv != null)
-							pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, bulletRotation, m_iDamage, m_fBulletSpeed, playerID );
+						InstantiateBullet(playerID, pv);
+						InstantiateThreatEmitter();
 					}
 				}
 				else
 				{
-					
-					InstantiateBullet(m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID);
-					//Create Networked Bullet
-					if(pv != null)
-						pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, playerID );
+					InstantiateBullet(playerID, pv);
+					InstantiateThreatEmitter();
 				}
 				
-
 				//This is not Network Safe
-
 				//GameObject emitThreat = (GameObject) Instantiate(Resources.Load ("ThreatEmitter"), transform.position, transform.rotation);
 				//emitThreat.GetComponent<ThreatEmitter>().SetValues(transform.position, playerID, m_fSoundRadius, m_iDamage);
 				
@@ -134,6 +115,7 @@ public class GunProperties : Photon.MonoBehaviour
 			}
 			else
 			{
+				// we're out of ammo, player automatically reloads upon trying to shoot
 				if (!m_bReloading)
 					StartCoroutine(Reload());
 			}
@@ -141,15 +123,28 @@ public class GunProperties : Photon.MonoBehaviour
 		}
 	}
 
-	//Creats a local Bullet
-	void InstantiateBullet(Vector3 pos, Quaternion rot, int dmg, float spd, int ID)
+	void InstantiateThreatEmitter()
 	{
-
-		Debug.Log ("Creating Bullet");
-		GameObject bullet = (GameObject) Instantiate (Resources.Load ("Bullet"), pos, rot);
-		bullet.GetComponent<Bullet>().SetDamage(m_iDamage);
-		bullet.GetComponent<Bullet>().SetBulletSpeed(m_fBulletSpeed);
-		bullet.GetComponent<Bullet>().SetPlayerID(ID);
+		GameObject threatEmitter = (GameObject)Instantiate (Resources.Load("ThreatEmitter"), transform.position, transform.rotation);
+		threatEmitter.GetComponent<ThreatEmitter>().SetValues(transform.position, transform.root.GetComponent<PlayerProperties>().m_iID, m_fSoundRadius, m_iDamage);
+	}
+	
+	//Creates a local and network Bullet
+	void InstantiateBullet(int ID, PhotonView pv)
+	{
+		Quaternion bulletRotation = new Quaternion(m_bulletSocket.transform.rotation.x, m_bulletSocket.transform.rotation.y, m_bulletSocket.transform.rotation.z, m_bulletSocket.transform.rotation.w);
+		bulletRotation.eulerAngles += new Vector3(Random.Range(-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread), Random.Range (-m_fRandomSpread, m_fRandomSpread));
+		
+		//Debug.Log ("Creating Bullet");
+		Bullet bullet = ((GameObject) Instantiate (Resources.Load ("Bullet"), m_bulletSocket.transform.position, bulletRotation)).GetComponent<Bullet>();
+		bullet.SetDamage(m_iDamage);
+		bullet.SetBulletSpeed(m_fBulletSpeed);
+		bullet.SetPlayerID(ID);
+		
+		//Create Networked Bullet
+		if(pv != null)
+			pv.RPC("InstantiateNetworkBullet", PhotonTargets.Others, m_bulletSocket.transform.position, m_bulletSocket.transform.rotation, m_iDamage, m_fBulletSpeed, ID);
+		
 	}
 	
 	private IEnumerator Reload()
