@@ -65,10 +65,9 @@ public class ItemSpawner : MonoBehaviour
 			newGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
 		else
 			newGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
-		
+		newGun.GetComponent<AmmoManager>().Start();
 		newGun.GetComponent<AmmoManager>().MaxAmmo();
 		newGun.GetComponent<GunProperties>().SetItemSpawner(gameObject);
-		newGun.GetComponent<GunProperties>().MaxAmmo();
 	}
 
 	private void SpawnItem()

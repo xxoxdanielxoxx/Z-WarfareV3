@@ -1,6 +1,9 @@
 [Name] Stephen AKA: Tech
 
 Daily Log
+10/03/14
+	chg: Lots of refactoring
+	chg/fix: Fixed a major bug/oversight where player would not pick up ammo for the weapon in their inventory
 10/02/14
 	chg: Refactored scripts, increased some readability
 	chg: Unfortnuately had to mess with Philip's Zombie scripts again, ZombieThreatRecognition

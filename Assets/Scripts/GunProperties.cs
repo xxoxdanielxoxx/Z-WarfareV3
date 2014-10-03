@@ -34,14 +34,13 @@ public class GunProperties : Photon.MonoBehaviour
 	public float m_fBulletSpeed = 4.0f;
 	public int m_iDamage = 10;
 	public GameObject m_ItemSpawner;
-	public int m_iAmmo = 0;
-	public int m_iMagSize = 20;
 	private int m_iMaxPistol = 17;
 	private int m_iMaxShotgun = 8;
 	private int m_iMaxRifle = 40;
 	private int m_iMaxSniper = 5;
 	private bool m_bReloading = false;
 	public float m_fReloadTime = 2.0f;
+	private AmmoManager m_ammoManager;
 	
 	[Range (1, 100)]
 	public float m_fSoundRadius = 10.0f;
@@ -58,16 +57,9 @@ public class GunProperties : Photon.MonoBehaviour
 		else if (tag == "Sniper")
 			m_eGun = GUNTYPE.Sniper;
 		
-		if (gameObject.tag == "Pistol")
-			m_iMagSize = m_iMaxPistol;
-		else if (tag == "Shotgun")
-			m_iMagSize = m_iMaxShotgun;
-		else if (tag == "Rifle")
-			m_iMagSize = m_iMaxRifle;
-		else if (tag == "Sniper")
-			m_iMagSize = m_iMaxSniper;
-		
 		m_fFireRateTimer = m_fFireRate;
+		
+		m_ammoManager = GetComponent<AmmoManager>();
 	}
 	
 	// Update is called once per frame
@@ -85,7 +77,7 @@ public class GunProperties : Photon.MonoBehaviour
 	{
 		if (m_fFireRateTimer <= 0)
 		{
-			if (m_iAmmo > 0 && !m_bReloading)
+			if (m_ammoManager.GetMagAmmo() > 0 && !m_bReloading)
 			{
 				m_fFireRateTimer = m_fFireRate;
 				int playerID =  transform.root.GetComponent<PlayerProperties>().m_iID;
@@ -105,17 +97,19 @@ public class GunProperties : Photon.MonoBehaviour
 					InstantiateThreatEmitter();
 				}
 				
+				// tell ammo manager to update the mag's ammo count
+				m_ammoManager.SetMagAmmo(m_ammoManager.GetMagAmmo() - 1);
+				// do gun recoil
+				//MouseLook mouseLook = GetComponentInParent<MouseLook>();
+				
 				//This is not Network Safe
 				//GameObject emitThreat = (GameObject) Instantiate(Resources.Load ("ThreatEmitter"), transform.position, transform.rotation);
 				//emitThreat.GetComponent<ThreatEmitter>().SetValues(transform.position, playerID, m_fSoundRadius, m_iDamage);
-				
-				m_iAmmo--;
-				// do gun recoil
-				//MouseLook mouseLook = GetComponentInParent<MouseLook>();
 			}
 			else
 			{
 				// we're out of ammo, player automatically reloads upon trying to shoot
+				// need to check again so that we don't end up starting dozens of coroutines
 				if (!m_bReloading)
 					StartCoroutine(Reload());
 			}
@@ -149,61 +143,21 @@ public class GunProperties : Photon.MonoBehaviour
 	
 	private IEnumerator Reload()
 	{
+		// shotgun will need its own reload logic because players will expect to be able to load one shell at a time
 		m_bReloading = true;
-		AmmoManager m_ammoManager = GetComponent<AmmoManager>();
-		int m_iAmmoNeeded = m_iMagSize - m_iAmmo;
-		
-		if (m_iAmmo < m_iMagSize)
+		if (!m_ammoManager.InvEmpty() && !m_ammoManager.MagFull())
 		{
-			if (m_ammoManager.GetAmmo() > 0)
-			{
-				yield return new WaitForSeconds(m_fReloadTime);
-				m_bReloading = false;
-				if (m_ammoManager.GetAmmo() >= m_iAmmoNeeded)
-				{
-					m_iAmmo += m_iAmmoNeeded;
-					m_ammoManager.SetAmmo(m_ammoManager.GetAmmo() - m_iAmmoNeeded);
-				}
-				else
-				{
-					m_iAmmo = m_ammoManager.GetAmmo();
-					// take all available bullets, tell ammoManager that it is empty
-					m_ammoManager.SetAmmo(0);
-				}
-			}
-			else
-			{
-				m_bReloading = false;
-			}
+			yield return new WaitForSeconds(m_fReloadTime);
+			m_bReloading = false;
+			m_ammoManager.Reload();
 		}
-	}
-	
-	public void MaxAmmo()
-	{
-		if (gameObject.tag == "Pistol")
-			m_iMagSize = m_iMaxPistol;
-		else if (tag == "Shotgun")
-			m_iMagSize = m_iMaxShotgun;
-		else if (tag == "Rifle")
-			m_iMagSize = m_iMaxRifle;
-		else if (tag == "Sniper")
-			m_iMagSize = m_iMaxSniper;
-		m_iAmmo = m_iMagSize;
+		else
+			m_bReloading = false;
 	}
 	
 	public GUNTYPE GetGunType()
 	{
 		return m_eGun;
-	}
-	
-	public void SetAmmo(int input)
-	{
-		m_iAmmo = input;
-	}
-	
-	public int GetAmmo()
-	{
-		return m_iAmmo;
 	}
 	
 	public void SetBulletSocket(GameObject input)

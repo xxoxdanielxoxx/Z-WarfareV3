@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+// this script is no longer used. use ItemSpawner as it is more general
 public class WeaponSpawner : MonoBehaviour 
 {
 	public enum Gun
@@ -43,13 +44,13 @@ public class WeaponSpawner : MonoBehaviour
 				{
 					m_fTimer = m_fInitialGunTimer;
 					m_bGunSpawned = true;
-					SpawnGun ();
+					//SpawnGun ();
 				}
 			}
 		}
 	}
 	
-	private void SpawnGun()
+	/*private void SpawnGun()
 	{
 		GameObject newGun;
 		
@@ -72,7 +73,7 @@ public class WeaponSpawner : MonoBehaviour
 		newGun.GetComponent<AmmoManager>().MaxAmmo();
 		newGun.GetComponent<GunProperties>().SetItemSpawner(gameObject);
 		newGun.GetComponent<GunProperties>().MaxAmmo();
-	}
+	}*/
 	
 	public void ChangeWeapon(Gun input)
 	{

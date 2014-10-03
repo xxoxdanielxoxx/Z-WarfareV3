@@ -19,6 +19,7 @@ public class WeaponManager : MonoBehaviour
 	private float m_fHoldETimer = 0.5f;
 	private float m_fInitialHoldETimer = 0.5f;
 	private bool m_bInPickupZone = false;
+	
 	private int m_iPrimaryAmmo;
 	private int m_iPrimaryReserveAmmo;
 	private int m_iSecondaryAmmo;
@@ -138,28 +139,48 @@ public class WeaponManager : MonoBehaviour
 	}
 	
 	// NOTE: This function is deprecated, does not do intendend behavior anymore. Use SetRemoteWeaponSwitch() instead.
-	public void SetRemoteWeaponSwitch(Slot input)
-	{
-		m_currentGun = input;
-	}
+	//public void SetRemoteWeaponSwitch(Slot input)
+	//{
+	//	m_currentGun = input;
+	//}
 	
 	public void SetRemoteWeaponSwitch()
 	{
 		SwitchWeapon();
 	}
 	
+	private GameObject InstantiateGun(GUNTYPE input)
+	{
+		GameObject newGun;
+		if (input == GUNTYPE.Pistol)
+			newGun = (GameObject)Instantiate(Resources.Load ("Pistol"));
+		else if (input == GUNTYPE.Shotgun)
+			newGun = (GameObject)Instantiate(Resources.Load ("Shotgun"));
+		else if (input == GUNTYPE.Rifle)
+			newGun = (GameObject)Instantiate(Resources.Load ("Rifle"));
+		else
+			newGun = (GameObject)Instantiate(Resources.Load ("Sniper"));
+		return newGun;
+	}
+	
+	private GameObject InstantiatePickup(GUNTYPE input)
+	{
+		GameObject newGun;
+		if (input == GUNTYPE.Pistol)
+			newGun = (GameObject) Instantiate(Resources.Load("PickupPistol"), transform.position, transform.rotation);
+		else if (input == GUNTYPE.Shotgun)
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
+		else if (input == GUNTYPE.Rifle)
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
+		else
+			newGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
+		return newGun;
+	}
+	
 	private void FirstGun(GUNTYPE input)
 	{
-		if (input == GUNTYPE.Pistol)
-			m_heldGun = (GameObject)Instantiate(Resources.Load ("Pistol"));
-		else if (input == GUNTYPE.Shotgun)
-			m_heldGun = (GameObject)Instantiate(Resources.Load ("Shotgun"));
-		else if (input == GUNTYPE.Rifle)
-			m_heldGun = (GameObject)Instantiate(Resources.Load ("Rifle"));
-		else
-			m_heldGun = (GameObject)Instantiate(Resources.Load ("Sniper"));
-			
-		m_heldGun.GetComponent<GunProperties>().MaxAmmo();
+		m_heldGun = InstantiateGun(input);
+		m_heldGun.GetComponent<AmmoManager>().Start();
 		m_heldGun.GetComponent<AmmoManager>().MaxAmmo();
 		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
 		m_heldGun.transform.localPosition = Vector3.zero;
@@ -170,75 +191,43 @@ public class WeaponManager : MonoBehaviour
 	private void DropGun(GUNTYPE input)
 	{
 		GameObject droppedGun;
-		if (input == GUNTYPE.Pistol)
-			droppedGun = (GameObject) Instantiate(Resources.Load("PickupPistol"), transform.position, transform.rotation);
-		else if (input == GUNTYPE.Shotgun)
-			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupShotgun"), transform.position, transform.rotation);
-		else if (input == GUNTYPE.Rifle)
-			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupRifle"), transform.position, transform.rotation);
-		else if (input == GUNTYPE.Sniper)
-			droppedGun = (GameObject) Instantiate(Resources.Load ("PickupSniper"), transform.position, transform.rotation);
-		else
-			droppedGun = null;
-		droppedGun.GetComponent<GunProperties>().SetAmmo(m_heldGun.GetComponent<GunProperties>().GetAmmo());
-		droppedGun.GetComponent<AmmoManager>().SetAmmo(m_heldGun.GetComponent<AmmoManager>().GetAmmo());
+		droppedGun = InstantiatePickup(input);
+		droppedGun.GetComponent<AmmoManager>().SetMagAmmo(m_heldGun.GetComponent<AmmoManager>().GetMagAmmo());
+		droppedGun.GetComponent<AmmoManager>().SetInvAmmo(m_heldGun.GetComponent<AmmoManager>().GetInvAmmo());
 	}
 	
-	private void PickUpGun(GameObject m_input)
+	private void PickUpGun(GameObject input)
 	{
 		// we need to replace the values for the current gun with this gun
 		if (m_currentGun == Slot.Gun1)
 		{
 			Destroy (m_heldGun);
-			if (m_ePrimary == GUNTYPE.Pistol)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
-			else if (m_ePrimary == GUNTYPE.Shotgun)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
-			else if (m_ePrimary == GUNTYPE.Rifle)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
-			else
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
-			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
-			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+			m_heldGun = InstantiateGun(m_ePrimary);
 		}
 		else
 		{
 			Destroy (m_heldGun);
-			if (m_eSecondary == GUNTYPE.Pistol)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
-			else if (m_eSecondary == GUNTYPE.Shotgun)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
-			else if (m_eSecondary == GUNTYPE.Rifle)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
-			else
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
-			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
-			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+			m_heldGun = InstantiateGun(m_eSecondary);
 		}
+		m_heldGun.GetComponent<AmmoManager>().SetMagAmmo(input.GetComponent<AmmoManager>().GetMagAmmo());
+		m_heldGun.GetComponent<AmmoManager>().SetInvAmmo(input.GetComponent<AmmoManager>().GetInvAmmo());
 		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
 		m_heldGun.transform.localPosition = Vector3.zero;
 		m_heldGun.transform.localEulerAngles = Vector3.zero;
 		m_heldGun.GetComponentInChildren<GunProperties>().SetBulletSocket(m_heldGun.transform.parent.transform.Find("BulletSocket").gameObject);
 	}
 	
-	private void PickUpGunSpecial(GameObject m_input)
+	private void PickUpGunSpecial(GameObject input)
 	{
 		// this is a special case just for when the player doesn't have two weapons yet, so he must only have a primary
-		m_iPrimaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
-		m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+		m_iPrimaryAmmo = m_heldGun.GetComponent<AmmoManager>().GetMagAmmo();
+		m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetInvAmmo();
 		
 		Destroy (m_heldGun);
 		
-		if (m_eSecondary == GUNTYPE.Pistol)
-			m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
-		else if (m_eSecondary == GUNTYPE.Shotgun)
-			m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
-		else if (m_eSecondary == GUNTYPE.Rifle)
-			m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
-		else
-			m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
-		m_heldGun.GetComponent<GunProperties>().SetAmmo(m_input.GetComponent<GunProperties>().GetAmmo());
-		m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_input.GetComponent<AmmoManager>().GetAmmo());
+		m_heldGun = InstantiateGun(m_eSecondary);
+		m_heldGun.GetComponent<AmmoManager>().SetMagAmmo(input.GetComponent<AmmoManager>().GetMagAmmo());
+		m_heldGun.GetComponent<AmmoManager>().SetInvAmmo(input.GetComponent<AmmoManager>().GetInvAmmo());
 		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
 		m_heldGun.transform.localPosition = Vector3.zero;
 		m_heldGun.transform.localEulerAngles = Vector3.zero;
@@ -250,42 +239,28 @@ public class WeaponManager : MonoBehaviour
 		// this function is designed for switching between the two guns on the character, all info is known on the object
 		if (m_currentGun == Slot.Gun1)
 		{
-			m_iSecondaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
-			m_iSecondaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+			m_iSecondaryAmmo = m_heldGun.GetComponent<AmmoManager>().GetMagAmmo();
+			m_iSecondaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetInvAmmo();
 		}
 		else
 		{
-			m_iPrimaryAmmo = m_heldGun.GetComponent<GunProperties>().GetAmmo();
-			m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetAmmo();
+			m_iPrimaryAmmo = m_heldGun.GetComponent<AmmoManager>().GetMagAmmo();
+			m_iPrimaryReserveAmmo = m_heldGun.GetComponent<AmmoManager>().GetInvAmmo();
 		}
 		
 		Destroy (m_heldGun);
 		
 		if (m_currentGun == Slot.Gun1)
 		{
-			if (m_ePrimary == GUNTYPE.Pistol)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
-			else if (m_ePrimary == GUNTYPE.Shotgun)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
-			else if (m_ePrimary == GUNTYPE.Rifle)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
-			else
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
-			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_iPrimaryAmmo);
-			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_iPrimaryReserveAmmo);
+			m_heldGun = InstantiateGun(m_ePrimary);
+			m_heldGun.GetComponent<AmmoManager>().SetMagAmmo(m_iPrimaryAmmo);
+			m_heldGun.GetComponent<AmmoManager>().SetInvAmmo(m_iPrimaryReserveAmmo);
 		}
 		else
 		{
-			if (m_eSecondary == GUNTYPE.Pistol)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Pistol"));
-			else if (m_eSecondary == GUNTYPE.Shotgun)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Shotgun"));
-			else if (m_eSecondary == GUNTYPE.Rifle)
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Rifle"));
-			else
-				m_heldGun = (GameObject) Instantiate(Resources.Load ("Sniper"));
-			m_heldGun.GetComponent<GunProperties>().SetAmmo(m_iSecondaryAmmo);
-			m_heldGun.GetComponent<AmmoManager>().SetAmmo(m_iSecondaryReserveAmmo);
+			m_heldGun = InstantiateGun(m_eSecondary);
+			m_heldGun.GetComponent<AmmoManager>().SetMagAmmo(m_iSecondaryAmmo);
+			m_heldGun.GetComponent<AmmoManager>().SetInvAmmo(m_iSecondaryReserveAmmo);
 		}
 		m_heldGun.transform.parent = gameObject.transform.FindChild("Main Camera/Gun");
 		m_heldGun.transform.localPosition = Vector3.zero;
@@ -313,14 +288,7 @@ public class WeaponManager : MonoBehaviour
 			else
 				otherGun = GUNTYPE.Sniper;
 			
-			if (!(otherGun == GUNTYPE.Pistol && m_ePrimary == GUNTYPE.Pistol) &&
-			    !(otherGun == GUNTYPE.Pistol && m_eSecondary == GUNTYPE.Pistol) &&
-			    !(otherGun == GUNTYPE.Shotgun && m_ePrimary == GUNTYPE.Shotgun) &&
-			    !(otherGun == GUNTYPE.Shotgun && m_eSecondary == GUNTYPE.Shotgun) &&
-			    !(otherGun == GUNTYPE.Rifle && m_ePrimary == GUNTYPE.Rifle) &&
-			    !(otherGun == GUNTYPE.Rifle && m_eSecondary == GUNTYPE.Rifle) &&
-			    !(otherGun == GUNTYPE.Sniper && m_ePrimary == GUNTYPE.Sniper) &&
-			    !(otherGun == GUNTYPE.Sniper && m_eSecondary == GUNTYPE.Sniper))
+			if (otherGun != m_ePrimary && otherGun != m_eSecondary)
 			{
 				// this is a gun that is not in our inventory, so it can potentially be picked up, add it to the list
 				m_availablePickups.Add(weapon);
@@ -347,12 +315,12 @@ public class WeaponManager : MonoBehaviour
 	{
 		Collider[] pickupColliders = Physics.OverlapSphere(transform.position, 1.5f, LayerMask.GetMask("PickupLayer"));
 		GUNTYPE otherGun;
-		foreach (Collider weapon in pickupColliders)
+		foreach (Collider otherWeapon in pickupColliders)
 		{
-			if (weapon.GetComponentInParent<GunProperties>())
+			// this is checking to see if there is indeed a GunProperties script on the pickup object
+			if (otherWeapon.GetComponentInParent<GunProperties>())
 			{
-				// this is checking to see if there is indeed a GunProperties script on the pickup object
-				GUNTYPE tempGun = weapon.GetComponentInParent<GunProperties>().GetGunType();
+				GUNTYPE tempGun = otherWeapon.GetComponentInParent<GunProperties>().GetGunType();
 				if (tempGun == GUNTYPE.Pistol)
 					otherGun = GUNTYPE.Pistol;
 				else if (tempGun == GUNTYPE.Shotgun)
@@ -362,19 +330,32 @@ public class WeaponManager : MonoBehaviour
 				else
 					otherGun = GUNTYPE.Sniper;
 				
-				if (otherGun == GUNTYPE.Pistol && m_ePrimary == GUNTYPE.Pistol ||
-				    otherGun == GUNTYPE.Pistol && m_eSecondary == GUNTYPE.Pistol ||
-				    otherGun == GUNTYPE.Shotgun && m_ePrimary == GUNTYPE.Shotgun ||
-				    otherGun == GUNTYPE.Shotgun && m_eSecondary == GUNTYPE.Shotgun ||
-				    otherGun == GUNTYPE.Rifle && m_ePrimary == GUNTYPE.Rifle ||
-				    otherGun == GUNTYPE.Rifle && m_eSecondary == GUNTYPE.Rifle ||
-				    otherGun == GUNTYPE.Sniper && m_ePrimary == GUNTYPE.Sniper ||
-				    otherGun == GUNTYPE.Sniper && m_eSecondary == GUNTYPE.Sniper)
+				if ((m_currentGun == Slot.Gun1 && otherGun == m_ePrimary) || (m_currentGun == Slot.Gun2 && otherGun == m_eSecondary))
 				{
-					// the player is currently already carring that weapon, which means they can get ammo
-					// get ammo from the pickup
-					GetComponentInChildren<AmmoManager>().FillUpAmmo(weapon.transform.parent.GetComponentInParent<AmmoManager>());
+					// the player is currently already carring that weapon and has it out, get ammo from the pickup
+					GetComponentInChildren<AmmoManager>().FillUpAmmo(otherWeapon.transform.parent.GetComponentInParent<AmmoManager>());
 				}
+				else if ((m_currentGun == Slot.Gun1 && otherGun == m_eSecondary) || (m_currentGun == Slot.Gun2 && otherGun == m_ePrimary))
+				{
+					// not very elegant way to do it, but works
+					// the player has that gun in their inventory, so get ammo for it 
+					int moreBullets;
+					if (m_currentGun == Slot.Gun1)
+					{
+						// we know we're carrying our primary, so get ammo for secondary
+						moreBullets = otherWeapon.GetComponentInParent<AmmoManager>().DepleteAmmo(m_eSecondary, m_iSecondaryReserveAmmo);
+						m_iSecondaryReserveAmmo += moreBullets;
+					}
+					else
+					{	
+						// we know we're carrying our secondary, get ammo for primary
+						moreBullets = otherWeapon.GetComponentInParent<AmmoManager>().DepleteAmmo(m_ePrimary, m_iPrimaryReserveAmmo);
+						Debug.Log ("moreBullets = " + moreBullets);
+						m_iPrimaryReserveAmmo += moreBullets;
+						Debug.Log ("m_iPrimaryReserveAmmo = " + m_iPrimaryReserveAmmo);
+					}
+				}
+				         
 			}
 		}
 	}
