@@ -64,3 +64,17 @@ Daily Log
   NOTES : Started up on some of the stuff Stephan needed. Will need to keep working on it. Threw in the arrays for district based zombie pools. Need to flesh out the logic for using the spawners for it though										
 													
 ---------------------------------------------------------------------------------------------------------
+
+					-=-= 10/7/14 =-=-
+---------------------------------------------------------------------------------------------------------
+  BUGFIX: ---
+													
+  UPDATE:
+		-Replaced prototype models for the zombies with the model Josh got
+													
+  ADDDED: 
+  		-Localized Hitboxes around vital zombie parts
+  
+  NOTES : Over the week I will add the localized damage taking and fix the floating zombie issue									
+													
+---------------------------------------------------------------------------------------------------------

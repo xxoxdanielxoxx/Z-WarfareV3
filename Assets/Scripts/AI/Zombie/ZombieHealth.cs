@@ -14,7 +14,7 @@ public class ZombieHealth : MonoBehaviour
 		m_bChange = true;
 		t = 0.1f;
 		
-		this.gameObject.renderer.material.color = Color.red;
+		//this.gameObject.renderer.material.color = Color.red;
 
 		if (m_iHealth < 0)
 			return false;
@@ -30,7 +30,7 @@ public class ZombieHealth : MonoBehaviour
 			t -= Time.deltaTime;
 			if (t < 0)
 			{
-				White();
+				//White();
 			}
 		}
 

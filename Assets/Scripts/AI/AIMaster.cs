@@ -281,7 +281,7 @@ public class AIMaster : Photon.MonoBehaviour
 			// Up the wave count and ready spawn related data
 			++wave;
 	
-			m_iZombieWaveLimit = wave*50;
+			m_iZombieWaveLimit = wave*10;
 			m_iZombiesLeft = m_iZombieWaveLimit;
 			m_iActiveZombies = 0;
 			m_fWaveTimer = m_fWaveDelay;
