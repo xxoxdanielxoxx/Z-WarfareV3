@@ -1,0 +1,97 @@
+fileFormatVersion: 2
+guid: 059248e960a562b48ac9ca419c9ea5cb
+SubstanceImporter:
+  serializedVersion: 5
+  materialInstances:
+  - serializedVersion: 12
+    name: PathTile
+    prototypeName: PathTile
+    shader: {fileID: 4800000, guid: 857f47563d80247cfa79677a8d496230, type: 3}
+    inputs:
+    - name: $randomseed
+      value:
+        scalar[0]: 0
+        scalar[1]: 0
+        scalar[2]: 0
+        scalar[3]: 0
+        texture: {instanceID: 0}
+    materialInformation:
+      serializedVersion: 5
+      offset: {x: 0, y: 0}
+      scale: {x: 1, y: 1}
+      generateMipmaps: 1
+      generateAllOutputs: 0
+      animationUpdateRate: 42
+    materialProperties:
+      serializedVersion: 2
+      texEnvs:
+        data:
+          first:
+            name: _MainTex
+          second:
+            texture: {instanceID: 0}
+            scale: {x: 1, y: 1}
+            offset: {x: 0, y: 0}
+        data:
+          first:
+            name: _BumpMap
+          second:
+            texture: {instanceID: 0}
+            scale: {x: 1, y: 1}
+            offset: {x: 0, y: 0}
+      floats:
+        data:
+          first:
+            name: _Shininess
+          second: .078125
+        data:
+          first:
+            name: _SpecInt
+          second: 1
+        data:
+          first:
+            name: _Fresnel
+          second: 0
+      colors:
+        data:
+          first:
+            name: _Color
+          second: {r: 1, g: 1, b: 1, a: 1}
+        data:
+          first:
+            name: _SpecColor
+          second: {r: 1, g: 1, b: 1, a: 1}
+    textureParameters:
+    - name: PathTile_diffuse
+      alphaSource: 5
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    - name: PathTile_normal
+      alphaSource: 0
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    - name: PathTile_specular
+      alphaSource: 0
+      filterMode: 1
+      aniso: 1
+      wrapMode: 0
+    textureAssignments:
+    - shaderProp:
+        name: _MainTex
+      material: {instanceID: 0}
+      baseUID: 1457504298
+    - shaderProp:
+        name: _BumpMap
+      material: {instanceID: 0}
+      baseUID: 1457504308
+    buildTargetSettings:
+    - serializedVersion: 2
+      buildTarget: 
+      textureWidth: 512
+      textureHeight: 512
+      textureFormat: 0
+      loadingBehavior: 1
+  deletedPrototypes: []
+  userData: 
