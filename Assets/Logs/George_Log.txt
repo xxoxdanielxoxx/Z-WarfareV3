@@ -13,6 +13,10 @@ Daily Log
 -------------------------------------------------------------------------------------------------
 
 
+10/9/14 Add: Game Manager
+		Add: authortative Spawner 
+		Notes: the Game Manager is going to be responsible for all Initialization will be the One Spot access to get Scripts.
+
 9/22/14         BUG: SOund Instatinationtion Emmitter is NOT network Safe it is Comminted out, I will fix this
 		Chng: Player IDs are now View IDS
 
