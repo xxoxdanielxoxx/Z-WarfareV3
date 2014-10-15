@@ -147,7 +147,7 @@ public class AIMaster : Photon.MonoBehaviour
 		GroupAI.FindMaster(this);
 		GroupAI.s_iCap = m_iGroupLimit;
 
-		Vector3 nonActiveSpawn = new Vector3(0,5.0f,0);
+		Vector3 nonActiveSpawn = new Vector3(0,0.0f,0);
 		m_iActiveZombies = 0;
 
 		// Spawn all possible zombies at once on load up

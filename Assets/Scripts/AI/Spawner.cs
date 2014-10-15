@@ -47,31 +47,6 @@ public class Spawner : MonoBehaviour
 		cellPosOrg.x -= m_fGridResW * 3;
 		cellPosOrg.z -= m_fGridResH * 3;
 		Vector3 cellPos = cellPosOrg; 
-
-		for (int i = 0; i < 16; ++i)	// Potato note: Grid size is hard coded atm
-		{
-			cellPos.x = cellPosOrg.x + (m_fGridResW*2) * (i%4);
-			cellPos.z = cellPosOrg.z + (m_fGridResH*2) * (i/4);
-
-			// Check each cell now, If it collides then set a bit to 1
-			if (Physics.CheckSphere(cellPos, 1.2f, 9))
-			{
-				m_BitArrayGrid = m_BitArrayGrid ^ (0x01 << i);
-				Debug.Log("Spawner #"+i+"can not spawn");
-			}
-
-			// Move the cellPos vector to the next cell so the test can begin again
-
-
-			// This is commented out but I left in here incase the grid is causing any trouble
-			#region DEBUG_SHOW_SPAWNER_GRID
-			Vector3 DEBUG_LINE_START = cellPos; 
-			DEBUG_LINE_START.x -= .1f; DEBUG_LINE_START.z -= .1f;
-			Vector3 DEBUG_LINE_END = cellPos;
-			DEBUG_LINE_END.x += .1f; DEBUG_LINE_END.z += .1f;
-			Debug.DrawLine(DEBUG_LINE_START, DEBUG_LINE_END, Color.yellow, 20.0f);
-			#endregion
-		}
 	}
 
 	/// <summary>

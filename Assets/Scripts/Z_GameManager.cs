@@ -68,15 +68,18 @@ public class Z_GameManager : Photon.MonoBehaviour
 	void ReadyCheck()
 	{
 		m_iNumOfPlayers++;
-		
-		if (m_iNumOfPlayers == PhotonNetwork.countOfPlayers) 
-		{
-			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.OthersBuffered);
-			SpawnLocalPlayer();
-			
-			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
-			StartCoroutine( m.StartAI());
-		}
+
+		//WORK in progress
+
+//
+//		if (m_iNumOfPlayers == PhotonNetwork.countOfPlayers) 
+//		{
+//			photonView.RPC ("SpawnLocalPlayer", PhotonTargets.OthersBuffered);
+//			SpawnLocalPlayer();
+//			
+//			AIMaster m = (AIMaster)FindObjectOfType(typeof(AIMaster));
+//			StartCoroutine( m.StartAI());
+//		}
 	} 
 
 	public bool IsHost()

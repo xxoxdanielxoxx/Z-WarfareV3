@@ -41,7 +41,6 @@ public class ZombieThreatRecognition : MonoBehaviour
 
 					m_logic.BuildHate((uint)bullet.GetDamage(), pIdx);
 				}
-				Destroy(_other.gameObject);
 			}
 		}
 	}
@@ -65,6 +64,30 @@ public class ZombieThreatRecognition : MonoBehaviour
 		else
 		{
 			// Enviromental hazard (IE. grenade)
+		}
+	}
+
+	public void BulletToTheHead(GameObject _other)
+	{
+		if (_other.tag == "Bullet")
+		{
+			Bullet bullet = _other.GetComponent<Bullet>();
+			if (bullet != null)
+			{
+				int pIdx = PlayerIDManager.Get().FindPlayerIndex( bullet.GetPlayerID());
+
+				// Zombie is dead
+				m_behaviour.GetStateMachine().ChangeState(ZombieStates.Dead);	// Potato: There's no dying animation, go directly to dead state. Do not pass GO.
+
+				if (m_behaviour.m_Group != null)
+				{
+					// Zombie is pissed
+					for (int i = 0; i < m_behaviour.m_Group.m_Zombie.Count; ++i)
+					{
+						m_behaviour.m_Group.m_Zombie[i].GetThreatLogic().BuildHate((uint)bullet.GetDamage(), pIdx);
+					}
+				}
+			}
 		}
 	}
 }

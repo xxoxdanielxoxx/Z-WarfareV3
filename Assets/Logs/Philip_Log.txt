@@ -78,3 +78,19 @@ Daily Log
   NOTES : Over the week I will add the localized damage taking and fix the floating zombie issue									
 													
 ---------------------------------------------------------------------------------------------------------
+
+
+					-=-= 10/14/14 =-=-
+---------------------------------------------------------------------------------------------------------
+  BUGFIX: 
+  		-Fixed the floating zombie issue. They are now planted firmly on the ground
+													
+  UPDATE:
+		-Implemented headshot insta kills on zombies
+		-Increased accuracy of hit dectection on zombies
+													
+  ADDDED: ---
+  
+  NOTES : Main focus of this update is the hit dectection on the zombies.							
+													
+---------------------------------------------------------------------------------------------------------

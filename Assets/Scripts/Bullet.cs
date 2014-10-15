@@ -44,18 +44,29 @@ public class Bullet : MonoBehaviour
 		//if (!m_rHit.collider || m_rHit.collider.tag == "WeaponSpawner")
 		//{
 			//it is still live and flying, move bullet to new physics position;
-			m_fDistanceTraveled += Vector3.Distance (transform.position, m_ray.GetPoint(m_fBulletSpeed));
-			transform.position = m_ray.GetPoint(m_fBulletSpeed);
+		m_fDistanceTraveled += Vector3.Distance (transform.position, m_ray.GetPoint(m_fBulletSpeed));
+		transform.position = m_ray.GetPoint(m_fBulletSpeed);
 
-			if (m_fDistanceTraveled >= m_fBulletRange)
+		if (m_fDistanceTraveled >= m_fBulletRange)
+		{
+			Destroy (gameObject);
+		}
+
+		if (m_rHit.transform && m_rHit.transform.GetComponent<ZombieHealth>())
+		{
+			// we hit a zombie
+			if (Physics.Raycast (m_ray, m_fBulletSpeed, 0x00001000))
 			{
-				Destroy (gameObject);
+				// Head shot
+				m_rHit.transform.GetComponent<ZombieThreatRecognition>().BulletToTheHead(this.gameObject);
 			}
-			if (m_rHit.transform && m_rHit.transform.GetComponent<ZombieHealth>())
+			else if (Physics.Raycast (m_ray, m_fBulletSpeed, 0x00002000))
 			{
-				// we hit a zombie
+				// Body shot
 				m_rHit.transform.GetComponent<ZombieThreatRecognition>().HitByBullet(this.gameObject);
 			}
+			Destroy (gameObject);
+		}
 		//}
 //		else
 //		{
