@@ -34,7 +34,7 @@ namespace mset {
 			}
 			copyToBuffer();
 		}
-		
+
 		public void copyToBuffer() {
 			for(int i=0; i<9; ++i) {
 				float eqc = sEquationConstants[i];

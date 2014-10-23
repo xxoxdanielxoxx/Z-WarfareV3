@@ -215,7 +215,7 @@ SubShader {
 	}
 	
 }
-
+/*
 SubShader {
 	Tags {
 		"IgnoreProjector"="True"
@@ -258,7 +258,7 @@ SubShader {
 		} 
 	}
 }
-
+*/
 SubShader {
 	Tags { "RenderType"="TreeLeaf" }
 	Pass {		

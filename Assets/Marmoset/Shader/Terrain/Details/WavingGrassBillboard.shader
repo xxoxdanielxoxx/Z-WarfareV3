@@ -10,7 +10,8 @@ Shader "Hidden/TerrainEngine/Details/BillboardWavingDoublePass" {
 	CGINCLUDE
 		#include "UnityCG.cginc"
 		#include "TerrainEngine.cginc"
-		
+		#pragma glsl_no_auto_normalization
+
 		struct v2f {
 			float4 pos : POSITION;
 			fixed4 color : COLOR;
@@ -36,11 +37,10 @@ Shader "Hidden/TerrainEngine/Details/BillboardWavingDoublePass" {
 		Cull Off
 		LOD 200
 		ColorMask RGB
-				
+
 		CGPROGRAM
 			#pragma surface MarmosetGrassSurf Lambert vertex:MarmosetGrassVert addshadow
 			#pragma exclude_renderers d3d11_9x flash
-			#pragma glsl_no_auto_normalization
 			#pragma target 3.0
 					
 			#pragma multi_compile MARMO_TERRAIN_BLEND_OFF MARMO_TERRAIN_BLEND_ON
@@ -56,7 +56,7 @@ Shader "Hidden/TerrainEngine/Details/BillboardWavingDoublePass" {
 			#include "../MarmosetGrass.cginc"
 		ENDCG
 	}
-
+	/*
 	SubShader {
 		Tags {
 			"Queue" = "Geometry+200"
@@ -71,7 +71,6 @@ Shader "Hidden/TerrainEngine/Details/BillboardWavingDoublePass" {
 		Pass {
 			CGPROGRAM
 				#pragma vertex BillboardVert
-				#pragma glsl_no_auto_normalization
 				#pragma exclude_renderers shaderonly
 			ENDCG
 
@@ -79,7 +78,6 @@ Shader "Hidden/TerrainEngine/Details/BillboardWavingDoublePass" {
 
 			SetTexture [_MainTex] { combine texture * primary DOUBLE, texture * primary }
 		}
-	} 
-	
+	}*/
 	Fallback Off
 }

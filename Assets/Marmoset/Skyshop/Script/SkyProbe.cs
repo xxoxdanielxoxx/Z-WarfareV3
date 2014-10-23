@@ -8,7 +8,6 @@ using System;
 using System.IO;
 
 namespace mset {
-	//Unused class. As of Unity 4.3.4, Camera.RenderToCubemap is broken in D3D9 so all probing is done through FreeProbe.
 	public class SkyProbe {
 		public RenderTexture cubeRT = null;
 		public int maxExponent = 512;
@@ -182,7 +181,7 @@ namespace mset {
 		}
 
 
-		public bool capture(Cubemap targetCube, Vector3 position, Quaternion rotation, bool HDR, bool linear, bool convolve) {
+		public bool capture(Texture targetCube, Vector3 position, Quaternion rotation, bool HDR, bool linear, bool convolve) {
 			if(targetCube == null) return false;
 
 			bool tempRT = false;
@@ -301,7 +300,8 @@ namespace mset {
 			cam.cullingMask = prevMask;
 			UnityEngine.RenderSettings.skybox = prevSkyMat;
 		}
-		private void convolve_internal(Cubemap dstCube, Texture srcCube, bool dstRGBM, bool srcRGBM, bool linear, Camera cam, Material skyMat, Matrix4x4 matrix) {
+
+		private void convolve_internal(Texture dstTex, Texture srcCube, bool dstRGBM, bool srcRGBM, bool linear, Camera cam, Material skyMat, Matrix4x4 matrix) {
 
 			bool prevHDR = cam.hdr;
 			CameraClearFlags prevFlags = cam.clearFlags;
@@ -324,28 +324,37 @@ namespace mset {
 			Material prevSkyMat = UnityEngine.RenderSettings.skybox;
 			UnityEngine.RenderSettings.skybox = skyMat;			
 
-			if( generateMipChain ) { 
-				int mipCount = mset.QPow.Log2i(dstCube.width) - 1;
-				int mip = highestMipIsMirror ? 1 : 0;
-				for( ; mip<mipCount; ++mip ) {
-					int mipSize = 1 << (mipCount-mip);
-					float mipExp = mset.QPow.clampedDownShift(this.maxExponent, highestMipIsMirror ? (mip-1) : mip, 1);
-					skyMat.SetFloat("_SpecularExp", mipExp);
-					skyMat.SetFloat ("_SpecularScale", this.convolutionScale);
-					Cubemap mipCube = new Cubemap(mipSize, dstCube.format, false);						
-					cam.RenderToCubemap(mipCube);
+			Cubemap dstCube = dstTex as Cubemap;
+			RenderTexture dstRT = dstTex as RenderTexture;
 
-					for(int f=0; f<6; ++f) {
-						CubemapFace face = (CubemapFace)f;
-						dstCube.SetPixels(mipCube.GetPixels(face), face, mip);
+			if( dstCube ) {
+				if( generateMipChain ) { 
+					int mipCount = mset.QPow.Log2i(dstCube.width) - 1;
+					int mip = highestMipIsMirror ? 1 : 0;
+					for( ; mip<mipCount; ++mip ) {
+						int mipSize = 1 << (mipCount-mip);
+						float mipExp = mset.QPow.clampedDownShift(this.maxExponent, highestMipIsMirror ? (mip-1) : mip, 1);
+						skyMat.SetFloat("_SpecularExp", mipExp);
+						skyMat.SetFloat ("_SpecularScale", this.convolutionScale);
+						Cubemap mipCube = new Cubemap(mipSize, dstCube.format, false);						
+						cam.RenderToCubemap(mipCube);
+
+						for(int f=0; f<6; ++f) {
+							CubemapFace face = (CubemapFace)f;
+							dstCube.SetPixels(mipCube.GetPixels(face), face, mip);
+						}
+						Cubemap.DestroyImmediate(mipCube);
 					}
-					Cubemap.DestroyImmediate(mipCube);
+					dstCube.Apply(false);
+				} else {
+					skyMat.SetFloat("_SpecularExp", this.maxExponent);
+					skyMat.SetFloat ("_SpecularScale", this.convolutionScale);
+					cam.RenderToCubemap(dstCube);
 				}
-				dstCube.Apply(false);
-			} else {
+			} else if(dstRT) {
 				skyMat.SetFloat("_SpecularExp", this.maxExponent);
 				skyMat.SetFloat ("_SpecularScale", this.convolutionScale);
-				cam.RenderToCubemap(dstCube);
+				cam.RenderToCubemap(dstRT);
 			}
 
 			cam.clearFlags = prevFlags;

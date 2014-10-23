@@ -8,7 +8,7 @@ using System;
 using System.IO;
 
 class Probeshop : EditorWindow {
-	public static void ProbeSkies(GameObject[] objects, mset.Sky[] skies, bool probeAll, bool probeIBL, Action doneCallback) {
+	public static void ProbeSkies(GameObject[] objects, mset.Sky[] skies, bool probeAll, bool probeIBL, System.Action doneCallback) {
 		mset.SkyManager mgr = mset.SkyManager.Get();
 		if(mgr) {
 			Probeshop window = (Probeshop)EditorWindow.GetWindow (typeof (Probeshop), true);
@@ -30,8 +30,9 @@ class Probeshop : EditorWindow {
 	private mset.FreeProbe freeProbe = null;
 	private mset.SkyProbe proProbe = null;
 	private bool useCubeRT = false;
+	private bool firstFrame = true;
 
-	public Action DoneCallback = null;
+	public System.Action DoneCallback = null;
 
 	private float progress = 0f;
 	private void SetProgress(float amt) {
@@ -71,16 +72,29 @@ class Probeshop : EditorWindow {
 		//EditorPrefs.SetBool("mset.ProbeOverride", true);
 		probing = true;
 		EditorApplication.isPlaying = true;
+		firstFrame = true;
 	}
 
 	private void ProbeUpdate() {
 		mset.SkyManager skmgr = mset.SkyManager.Get();
 		if(UnityEditor.EditorApplication.isPlaying && skmgr.SkiesToProbe != null) {
+
+			if(firstFrame) {
+				if(skmgr.ProbeOnlyStatic) {
+					//hide dynamics
+					Renderer[] rends = GameObject.FindObjectsOfType<Renderer>();
+					foreach(Renderer rend in rends) {
+						if(!rend.gameObject.isStatic) rend.gameObject.SetActive(false);
+					}
+				}
+				firstFrame = false;
+			}
+
 			if(useCubeRT) {
 				if(proProbe == null) {
 					proProbe = new mset.SkyProbe();
 				}
-				
+
 				//Run the whole loop in place and finish
 				bool success = true;
 				int i = 0;
@@ -114,6 +128,7 @@ class Probeshop : EditorWindow {
 				//Create a game object and let the update loop run until DoneCallback gets called
 				if(freeProbe == null) {
 					GameObject go = new GameObject();
+					go.name = "FreeProbe Object";
 					go.AddComponent<Camera>();
 					freeProbe = go.AddComponent<mset.FreeProbe>();
 					skmgr.GameApplySkies(true);
@@ -137,12 +152,16 @@ class Probeshop : EditorWindow {
 	}
 
 	private void CueProbeFinish() {
-		EditorApplication.isPlaying = false;
 		this.finishing = true;
 		this.probing = false;
+		if( this.freeProbe ) {
+			GameObject.Destroy( this.freeProbe.gameObject );
+		}
+
 	}
 
 	private void ProbeFinish() {
+		EditorApplication.isPlaying = false;
 		mset.SkyManager skmgr = mset.SkyManager.Get();
 		foreach(mset.Sky sky in skmgr.SkiesToProbe) {
 			if(sky.SpecularCube as Cubemap) {
@@ -167,6 +186,7 @@ class Probeshop : EditorWindow {
 
 		if(DoneCallback != null) DoneCallback();
 		DoneCallback = null;
+
 		Close();
 	}
 	

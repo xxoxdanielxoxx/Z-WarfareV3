@@ -93,31 +93,6 @@ Shader "Marmoset/Nature/Tree Soft Occlusion Leaves" {
 			ENDCG	
 		}
 	}
-	
-	SubShader {
-		Tags {
-			"Queue" = "Transparent-99"
-			"IgnoreProjector"="True"
-			"RenderType" = "TreeTransparentCutout"
-		}
-		Cull Off
-		ColorMask RGB
-		
-		Pass {
-			CGPROGRAM
-			#pragma exclude_renderers shaderonly
-			#pragma vertex leaves
-			#include "SH_Vertex.cginc"
-			ENDCG
-
-			Lighting On
-			AlphaTest GEqual [_Cutoff]
-			ZWrite On
-			
-			SetTexture [_MainTex] { combine primary * texture DOUBLE, texture }
-		}
-	}
-	
 	SubShader {
 		Tags {
 			"Queue" = "Transparent-99"

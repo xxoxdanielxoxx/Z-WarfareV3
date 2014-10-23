@@ -79,6 +79,7 @@ SubShader {
 	#define MARMO_SKY_ROTATION
 	#define MARMO_DIFFUSE_FRESNEL
 	#define MARMO_FIRST_PASS
+	#define MARMO_DIFFUSE_BASE
 
 	#include "../MarmosetCore.cginc"
 	#include "MarmosetTerrain.cginc"
@@ -117,6 +118,7 @@ SubShader {
 	#define MARMO_SKY_ROTATION
 	#define MARMO_DIFFUSE_FRESNEL
 	#define MARMO_FIRST_PASS
+	#define MARMO_DIFFUSE_BASE
 
 	#include "../MarmosetCore.cginc"
 	#include "MarmosetTerrain.cginc"

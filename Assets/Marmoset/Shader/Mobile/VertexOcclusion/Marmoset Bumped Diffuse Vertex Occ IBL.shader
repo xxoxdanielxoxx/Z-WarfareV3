@@ -29,7 +29,7 @@ Shader "Marmoset/Mobile/Vertex Occlusion/Bumped Diffuse IBL" {
 		#endif
 		
 		#pragma target 3.0
-		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert fullforwardshadows  approxview
+		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert exclude_path:prepass noforwardadd approxview
 		#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x
 		
 		#pragma multi_compile MARMO_SKY_BLEND_OFF MARMO_SKY_BLEND_ON
@@ -50,7 +50,8 @@ Shader "Marmoset/Mobile/Vertex Occlusion/Bumped Diffuse IBL" {
 		//#define MARMO_PREMULT_ALPHA
 		//#define MARMO_OCCLUSION
 		//#define MARMO_VERTEX_COLOR
-		#define MARMO_VERTEX_OCCLUSION
+		//#define MARMO_VERTEX_OCCLUSION
+		#define MARMO_PACKED_VERTEX_OCCLUSION
 		
 		#include "../../MarmosetMobile.cginc"
 		#include "../../MarmosetInput.cginc"

@@ -49,6 +49,8 @@ namespace mset {
 		public RenderTexture RT = null;
 
 		public mset.SHEncoding SH = null;
+
+		public bool computeSH = false;
 		
 		private SerializedObject srInput = null;
 		
@@ -232,7 +234,9 @@ namespace mset {
 					if( !System.IO.Directory.Exists(path) ) {
 						System.IO.Directory.CreateDirectory(path);
 					}
-					path +=  "/untitled";
+					string refName = skyName;
+					if( refName.Length == 0 ) refName = "untitled";
+					path +=  "/" + refName;
 				}
 			}
 
@@ -428,8 +432,9 @@ namespace mset {
 			}
 		}		
 		private string suggestPath(string refPath, bool unique) {
-
-			if( refPath.Length == 0 ) refPath = "Assets/untitled.cubemap";
+			string refName = skyName;
+			if( refName.Length == 0 ) refName = "untitled";
+			if( refPath.Length == 0 ) refPath = "Assets/" + refName + ".cubemap";
 			
 			string postfix = "";
 			string fileExt = "";
@@ -457,7 +462,6 @@ namespace mset {
 			//string path = refPath.Substring(0,dot) + postfix + "." + fileExt;
 
 			string refDir = Path.GetDirectoryName(refPath)+"/";
-			string refName = "untitled";
 			if( inputGUI && inputGUI.skyName.Length > 0 ) refName = inputGUI.skyName;
 
 			string path = refDir + refName + postfix + "." + fileExt;
@@ -1226,8 +1230,8 @@ namespace mset {
 				Debug.LogError("Invalid texture type for CubeGUI input!");
 			}
 
-			SH.clearToBlack();
-			if( this.type == Type.SIM ) {
+			if( this.computeSH ) {
+				SH.clearToBlack();
 				//try a low mip to project from first
 				if(!this.buffers[3].empty())SHUtil.projectCubeBuffer(ref SH, this.buffers[3]);
 				else 						SHUtil.projectCubeBuffer(ref SH, this.buffers[0]);

@@ -91,27 +91,20 @@ Shader "Marmoset/Beta/Layered/ Masked 2-Layer IBL" {
 		#define MARMO_DIFFUSE_FUZZ
 		
 		//TODO: not enough interpolators to get worldPos into box projection >_<
-		//#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
 		//#if MARMO_BOX_PROJECTION_ON
 		//#define MARMO_BOX_PROJECTION
 		//#endif
 				
 		//diffuse always on
-		//#pragma multi_compile MARMO_DIFFUSE_OFF	MARMO_DIFFUSE_ON
 		#define MARMO_DIFFUSE_ON 1
 		
-		//#pragma multi_compile MARMO_LAYER_MASK_VERTEX_COLOR  MARMO_LAYER_MASK_TEXTURE_UV0  MARMO_LAYER_MASK_TEXTURE_UV1
-		//#pragma multi_compile MARMO_LAYER_COUNT_STANDARD     MARMO_LAYER_COUNT_2_LAYER     MARMO_LAYER_COUNT_4_LAYER		
 		#define MARMO_LAYER_MASK_TEXTURE_UV0 1
 		#define MARMO_LAYER_COUNT_2_LAYER 1
 		
-		//#pragma multi_compile MARMO_SPECULAR_OFF	MARMO_SPECULAR_ON
 		#define MARMO_SPECULAR_ON 1		
 		
-		//#pragma multi_compile MARMO_BUMP_OFF		MARMO_BUMP_ON
 		#define MARMO_BUMP_ON 1
 		
-		//#pragma multi_compile MARMO_DIFFUSE_SPECULAR_COMBINED_OFF    MARMO_DIFFUSE_SPECULAR_COMBINED_ON
 		#define MARMO_DIFFUSE_SPECULAR_COMBINED_ON 0
 		
 		#pragma multi_compile MARMO_SKY_BLEND_OFF		MARMO_SKY_BLEND_ON

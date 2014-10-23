@@ -5,12 +5,11 @@
 Shader "Marmoset/Mobile/Self-Illumin/Bumped Diffuse IBL" {
 	Properties {
 		_Color   ("Diffuse Color", Color) = (1,1,1,1)
-		_MainTex ("Diffuse(RGB) Alpha(A)", 2D) = "white" {}
+		_MainTex ("Diffuse(RGB) Emission(A)", 2D) = "white" {}
 		_BumpMap ("Normalmap", 2D) 	= "bump" {}
 		_GlowColor ("Glow Color", Color) = (1,1,1,1)
-		_GlowStrength("Glow Strength", Float) = 1.0
+		_EmissionColor ("Emission Color", Color) = (1,1,1,1)
 		_EmissionLM ("Diffuse Emission Strength", Float) = 0.0
-		_Illum ("Glow(RGB) Diffuse Emission(A)", 2D) = "white" {}
 	}
 	
 	SubShader {
@@ -49,7 +48,7 @@ Shader "Marmoset/Mobile/Self-Illumin/Bumped Diffuse IBL" {
 		//#define MARMO_SPECULAR_DIRECT
 		#define MARMO_NORMALMAP
 		//#define MARMO_MIP_GLOSS
-		#define MARMO_GLOW
+		#define MARMO_DIFFUSE_GLOW_COMBINED
 		//#define MARMO_PREMULT_ALPHA
 		
 		#include "../../MarmosetMobile.cginc"

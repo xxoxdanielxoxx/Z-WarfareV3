@@ -31,23 +31,31 @@ half3 blendedDiffuseIBL(float3 worldN) {
 void MarmosetVert(inout appdata_full v, out Input o) {
 	UNITY_INITIALIZE_OUTPUT(Input,o);
 	o.texcoord.xy = v.texcoord.xy;
-	#ifdef MARMO_OCCLUSION
-		o.texcoord.zw = v.texcoord1.xy;
+	o.texcoord.zw = v.texcoord1.xy;
+	
+	#if defined(MARMO_SPECULAR_IBL) || defined(MARMO_BOX_PROJECTION)
+		o.worldP.xyz = mul(_Object2World, v.vertex);
 	#endif
+	
+	
 	#if defined(MARMO_VERTEX_COLOR) || defined(MARMO_VERTEX_LAYER_MASK)
 		o.color = v.color;
 	#elif defined(MARMO_VERTEX_OCCLUSION)
 		o.color = v.color.rg;
 	#endif
-	#ifdef MARMO_BOX_PROJECTION
-		o.worldPos = mul(_Object2World, v.vertex);
-	#endif
-		
-	float3 worldN = mul((float3x3)_Object2World, v.normal * unity_Scale.w);
 	
-	#ifndef MARMO_NORMALMAP
-		o.worldN = worldN;
+	#ifdef MARMO_PACKED_VERTEX_OCCLUSION
+		o.texcoord.zw = v.color.rg;
 	#endif
+
+	#ifdef MARMO_PACKED_VERTEX_COLOR
+		o.texcoord.zw = v.color.rg;
+		o.worldP.w = v.color.b;
+	#endif
+				
+	float3 worldN = normalize(mul((float3x3)_Object2World, SCALED_NORMAL));
+	//Doesn't matter, Unity will recompute this and without scale afterwards >_<
+	//o.worldNormal.xyz = worldN;
 	
 	#ifdef MARMO_DIFFUSE_VERTEX_IBL
 		o.vertexIBL = blendedDiffuseIBL(worldN);
@@ -128,6 +136,11 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 		baseColor *= IN.color;
 	#endif
 	
+	#ifdef MARMO_PACKED_VERTEX_COLOR
+		baseColor.rg *= IN.texcoord.zw;
+		baseColor.b *= IN.worldP.w;
+	#endif
+	
 	#if defined(MARMO_VERTEX_LAYER_MASK)
 		half4 layerWeight = IN.color;
 	#elif defined(MARMO_TEXTURE_LAYER_MASK)
@@ -144,7 +157,7 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 	#ifdef MARMO_DIFFUSE_SPECULAR_COMBINED
 		half4 diffspec = half4(1.0,1.0,1.0,1.0);
 	#endif
-		
+			
 	//DIFFUSE
 	#if defined(MARMO_DIFFUSE_DIRECT) || defined(MARMO_DIFFUSE_IBL)
 		//Layered diffuse
@@ -167,6 +180,10 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 			diffspec = diff.aaaa;
 		#endif
 		
+		#ifdef MARMO_DIFFUSE_GLOW_COMBINED
+			half3 diffglow = diff.rgb * diff.a;
+		#endif
+		
 		//NOTE: this was the old way of doing it to separate vertex and base color from combined diff-spec alpha
 		//diff *= baseColor;
 		
@@ -177,7 +194,7 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 		#endif
 		OUT.Albedo = diff.rgb;		
 		OUT.Alpha = diff.a;
-	#else
+	#else	
 		#ifdef MARMO_DIFFUSE_DIRECT
 			OUT.Albedo = baseColor.rgb;
 		#else
@@ -188,16 +205,28 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 		#ifdef MARMO_SIMPLE_GLASS
 			OUT.Albedo.rgb *= baseColor.a;
 		#endif
+		#ifdef MARMO_DIFFUSE_GLOW_COMBINED
+			half3 diffglow = baseColor.rgb * baseColor.a;
+		#endif		
+	#endif
+	
+	#ifdef MARMO_ALPHA_CLIP
+		clip(OUT.Alpha - _Cutoff);
 	#endif
 	
 	//AMBIENT OCC
-	#if defined(MARMO_VERTEX_OCCLUSION) || defined(MARMO_OCCLUSION)
+	#if defined(MARMO_VERTEX_OCCLUSION) || defined(MARMO_OCCLUSION) || defined(MARMO_PACKED_VERTEX_OCCLUSION)
 		half4 occ = half4(1.0,1.0,1.0,1.0);
 		#ifdef MARMO_OCCLUSION
 			occ = tex2D(_OccTex, uv_occ);
 		#endif
+		
 		#ifdef MARMO_VERTEX_OCCLUSION
 			occ.rg *= IN.color.rg;
+		#endif
+		
+		#ifdef MARMO_PACKED_VERTEX_OCCLUSION
+			occ.rg *= IN.texcoord.zw;
 		#endif
 		occ = lerp(half4(1.0,1.0,1.0,1.0),occ, _OccStrength);
 		//TODO: occlude lightprobe SH by diffuse AO
@@ -231,18 +260,14 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 			localN = normalize(localN);
 		#else
 			float3 localN = UnpackNormal(tex2D( _BumpMap, uv_bump ));
-			#ifdef MARMO_HQ
-				localN = normalize(localN);
-			#endif			
+			localN = normalize(localN);
 		#endif
 		//localN and viewDir are in tangent-space
 		OUT.Normal = localN;
 		float3 worldN = WorldNormalVector(IN,localN);
 	#else
-		float3 worldN = IN.worldN;
-		#ifdef MARMO_HQ
-			worldN = normalize(worldN);
-		#endif
+		float3 worldN = IN.worldNormal.xyz;
+		worldN = normalize(worldN);
 		#if defined(UNITY_PASS_PREPASSFINAL)
 			float3 localN = float3(0.0,0.0,1.0);
 			//localN and viewDir are in tangent-space
@@ -291,7 +316,7 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 			half _fresnel = _Fresnel;
 		#endif
 		
-		float3 localE = IN.viewDir;
+		float3 localE = IN.viewDir.xyz;
 		#ifdef MARMO_HQ
 			localE = normalize(localE);
 			half fresnel = splineFresnel(localN, localE, _SpecInt, _fresnel);
@@ -326,11 +351,15 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 	#endif
 	
 	//GLOW
-	#ifdef MARMO_GLOW
+	#if defined(MARMO_DIFFUSE_GLOW_COMBINED)
+		half3 glow = diffglow.rgb * _EmissionColor.rgb;
+		glow.rgb *= exposureIBL.w * _EmissionLM;
+		OUT.Emission += glow.rgb;
+	#elif defined(MARMO_GLOW)
 		half4 glow = tex2D(_Illum, uv_glow);
 		#ifdef MARMO_SIMPLE_GLASS
 			glow *= OUT.Alpha;
-		#endif
+		#endif		
 		glow.rgb *= _GlowColor.rgb;
 		glow.rgb *= _GlowStrength;
 		glow.rgb *= exposureIBL.w;
@@ -341,7 +370,7 @@ void MarmosetSurf(Input IN, inout MarmosetOutput OUT) {
 	#endif
 		
 	#if defined(MARMO_SPECULAR_IBL) || defined(MARMO_BOX_PROJECTION)
-		float3 worldP = IN.worldPos;		
+		float3 worldP = IN.worldP.xyz;		
 	#else
 		float3 worldP = float3(0.0,0.0,0.0);
 	#endif

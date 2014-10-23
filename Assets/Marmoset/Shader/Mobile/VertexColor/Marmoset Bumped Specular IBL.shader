@@ -32,7 +32,7 @@ Shader "Marmoset/Mobile/Vertex Color/Bumped Specular IBL" {
 		#endif
 				
 		#pragma target 3.0
-		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert fullforwardshadows  approxview nolightmap nodirlightmap
+		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert exclude_path:prepass noforwardadd approxview
 		//NOTE: lightmapping + vertex color puts this shader over the SM3 interpolant count
 		//mobile primary
 		#pragma only_renderers d3d9 opengl gles
@@ -58,7 +58,7 @@ Shader "Marmoset/Mobile/Vertex Color/Bumped Specular IBL" {
 		//#define MARMO_GLOW
 		//#define MARMO_PREMULT_ALPHA
 		//#define MARMO_OCCLUSION
-		#define MARMO_VERTEX_COLOR
+		#define MARMO_PACKED_VERTEX_COLOR
 		//#define MARMO_VERTEX_OCCLUSION
 				
 		#include "../../MarmosetMobile.cginc"			
@@ -88,7 +88,7 @@ Shader "Marmoset/Mobile/Vertex Color/Bumped Specular IBL" {
 		#endif
 				
 		#pragma target 3.0
-		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert fullforwardshadows  approxview
+		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert exclude_path:prepass noforwardadd approxview
 		//mobile secondary
 		#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x				
 		#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
@@ -113,7 +113,7 @@ Shader "Marmoset/Mobile/Vertex Color/Bumped Specular IBL" {
 		//#define MARMO_GLOW
 		//#define MARMO_PREMULT_ALPHA
 		//#define MARMO_OCCLUSION
-		#define MARMO_VERTEX_COLOR
+		#define MARMO_PACKED_VERTEX_COLOR
 		//#define MARMO_VERTEX_OCCLUSION
 				
 		#include "../../MarmosetMobile.cginc"			

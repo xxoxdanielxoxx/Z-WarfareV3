@@ -62,7 +62,7 @@ SubShader {
 	#pragma glsl
 	#pragma target 3.0
 	//NOTE: BlinnPhong instead of MarmosetDirect is fine here, MarmosetDirect is only needed for RGB specular
-	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert
+	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert exclude_path:prepass noforwardadd approxview nodirlightmap
 	// fullforwardshadows	
 	#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x
 	//gamma-correct sampling permutations
@@ -80,6 +80,7 @@ SubShader {
 	#define MARMO_MIP_GLOSS
 	#define MARMO_NORMALMAP
 	//#define MARMO_NORMALMAP_DETAIL
+	//#define MARMO_DIFFUSE_BASE
 	#define MARMO_SKY_ROTATION
 	#define MARMO_DIFFUSE_FRESNEL
 	#define MARMO_FIRST_PASS
@@ -102,7 +103,7 @@ SubShader {
 	#pragma glsl
 	#pragma target 3.0
 	//NOTE: BlinnPhong instead of MarmosetDirect is fine here, MarmosetDirect is only needed for RGB specular
-	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert fullforwardshadows addshadow
+	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert exclude_path:prepass noforwardadd approxview nodirlightmap
 	#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x
 	//gamma-correct sampling permutations
 			
@@ -142,7 +143,7 @@ SubShader {
 	#pragma glsl
 	#pragma target 3.0
 	//NOTE: BlinnPhong instead of MarmosetDirect is fine here, MarmosetDirect is only needed for RGB specular
-	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert fullforwardshadows addshadow
+	#pragma surface MarmosetTerrainSurf BlinnPhong vertex:MarmosetTerrainVert exclude_path:prepass noforwardadd approxview nodirlightmap
 	#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x
 	//gamma-correct sampling permutations
 			

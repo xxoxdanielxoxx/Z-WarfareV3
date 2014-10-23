@@ -2,8 +2,10 @@
 // Copyright 2014 Marmoset LLC
 // http://marmoset.co
 
-//causes material property issues pre 4.5 and causes 2D sprites to render white
-//#define USE_PROPERTY_BLOCKS
+//WARNING: causes material property issues in OSX and anything pre 4.5
+#if !UNITY_STANDALONE_OSX
+#define USE_PROPERTY_BLOCKS
+#endif
 
 using UnityEngine;
 using System.Collections;
@@ -51,6 +53,12 @@ namespace mset {
 
 		public bool GameAutoApply = true;
 		public bool	EditorAutoApply = true;
+		public bool AutoMaterial = false;
+
+		public int IgnoredLayerMask = 0;
+		//For internal use by SkyManagerInspector
+		public int[] _IgnoredLayers = new int[32];
+		public int   _IgnoredLayerCount = 0;
 
 		//GLOBAL SKY & BLENDING
 		[SerializeField]
@@ -69,8 +77,9 @@ namespace mset {
 				#endif
 			}
 		}
-		public void BlendToGlobalSky(mset.Sky next) { BlendToGlobalSky(next, GlobalBlendTime); }
-		public void BlendToGlobalSky(mset.Sky next, float blendTime) {
+		public void BlendToGlobalSky(mset.Sky next) { BlendToGlobalSky(next, GlobalBlendTime, 0f); }
+		public void BlendToGlobalSky(mset.Sky next, float blendTime) { BlendToGlobalSky(next, blendTime, 0f); }
+		public void BlendToGlobalSky(mset.Sky next, float blendTime, float skipTime) {
 			if(next != null) {
 				nextSky = next;
 				#if UNITY_EDITOR
@@ -78,6 +87,7 @@ namespace mset {
 				#else
 				nextBlendTime = blendTime;
 				#endif
+				nextSkipTime = skipTime;
 			}
 			//??? Harmless but weird? where did this come from?
 			_GlobalSky = nextSky;
@@ -87,6 +97,7 @@ namespace mset {
 		private SkyBlender GlobalBlender = new mset.SkyBlender();
 		private mset.Sky nextSky = null;
 		private float nextBlendTime = 0f;
+		private float nextSkipTime = 0f;
 		public float LocalBlendTime = 0.25f;
 		public float GlobalBlendTime = 0.25f;
 
@@ -179,7 +190,7 @@ namespace mset {
 					foreach(mset.Sky sky in allSkies) {
 						sky.ToggleChildLights(false);
 					}
-					
+					GlobalBlender.SkipTime(nextSkipTime);					
 					StartLightBlend(currSky, nextSky);
 				} else {
 					//SNAP
@@ -268,26 +279,38 @@ namespace mset {
 		public void UnregisterApplicator(mset.SkyApplicator app, HashSet<Renderer> renderersToClear) {
 			skyApplicators.Remove(app);
 			foreach(Renderer rend in renderersToClear) {
-				if(_GlobalSky != null) _GlobalSky.Apply(rend);
+				if(_GlobalSky != null) _GlobalSky.Apply(rend,0);
 			}
 		}
 
+		public void UnregisterRenderer(Renderer rend) {
+			if(!dynamicRenderers.Remove(rend)) staticRenderers.Remove(rend);
+		}
+
 		public void RegisterNewRenderer(Renderer rend) {
-			if(rend.gameObject.activeInHierarchy && !dynamicRenderers.Contains(rend) && !staticRenderers.Contains(rend)) {
-				if(rend.gameObject.isStatic) {
+			//filter by active
+			if(!rend.gameObject.activeInHierarchy) return;
+
+			//filter by ignored layers
+			int layerFlag = 1 << rend.gameObject.layer;
+			if((IgnoredLayerMask & layerFlag) != 0) return;
+
+			//sort by static/dynamic
+			if(rend.gameObject.isStatic) {
+				if(!staticRenderers.Contains(rend)) {
 					staticRenderers.Add(rend);
 					ApplyCorrectSky(rend);
-				} else {
-					dynamicRenderers.Add(rend);
-					if(rend.GetComponent<mset.SkyAnchor>() == null) {
-						rend.gameObject.AddComponent(typeof(mset.SkyAnchor));
-					}
+				}
+			} else if(!dynamicRenderers.Contains(rend)) {
+				dynamicRenderers.Add(rend);
+				if(rend.GetComponent<mset.SkyAnchor>() == null) {
+					rend.gameObject.AddComponent(typeof(mset.SkyAnchor));
 				}
 			}
 		}
 
 		public void SeekNewRenderers() {
-			object[] renderers = FindObjectsOfType(typeof(Renderer));
+			Object[] renderers = FindObjectsOfType(typeof(MeshRenderer));
 			for(int iter = 0; iter < renderers.Length; iter++) {
 				Renderer rend = ((Renderer)renderers[iter]);
 				RegisterNewRenderer(rend);
@@ -295,6 +318,7 @@ namespace mset {
 		}
 
 		public void ApplyCorrectSky(Renderer rend) {
+			//filter by ignored layers
 			bool localCube = false;
 
 			//if the anchor is a direct link to a sky, ignore applicators all together
@@ -320,7 +344,7 @@ namespace mset {
 					//start last blend to global sky and tell the anchor it's gone global
 					anchor.BlendToGlobalSky(_GlobalSky);
 				} else {
-					_GlobalSky.Apply(rend);
+					_GlobalSky.Apply(rend,0);
 				}
 
 				if(!globalSkyChildren.Contains(rend)) globalSkyChildren.Add(rend);
@@ -349,6 +373,14 @@ namespace mset {
 			}
 			HandleGlobalSkyChange();
 			if(EditorAutoApply) EditorApplySkies(false);
+
+#if UNITY_EDITOR
+			//update all skies here
+			mset.Sky[] skies = FindObjectsOfType<mset.Sky>();
+			foreach(mset.Sky sky in skies) {
+				sky.EditorUpdate();
+			}
+#endif
 		}
 
 		//Brute-force through all applicators and test all renderers against them. This method is used in editor mode because
@@ -356,10 +388,15 @@ namespace mset {
 		public void EditorApplySkies(bool forceApply) {
 			Shader.SetGlobalVector("_UniformOcclusion", Vector4.one);
 
-			Renderer[] rends = GameObject.FindObjectsOfType<Renderer>();
+			object[] renderers = FindObjectsOfType(typeof(MeshRenderer));
 			mset.SkyApplicator[] apps = GameObject.FindObjectsOfType<mset.SkyApplicator>();			
 
-			foreach(Renderer rend in rends) {
+			foreach(object mr in renderers) {
+				Renderer rend = (Renderer)mr;
+
+				//filter by ignored layers
+				int layerFlag = 1 << rend.gameObject.layer;
+				if( (IgnoredLayerMask & layerFlag) != 0 ) continue;
 				if(!rend.gameObject.activeInHierarchy) continue;
 
 				#if USE_PROPERTY_BLOCKS
@@ -396,7 +433,7 @@ namespace mset {
 				
 				if(!localFound && _GlobalSky) {
 					if(forceApply || _GlobalSky.Dirty || rendHasChanged) {
-						_GlobalSky.Apply(rend);
+						_GlobalSky.Apply(rend,0);
 					}
 				}
 				//HACK: we are checking and clearing hasChanged in a weird place during the editor loop. Hopefully that won't conflict with other plugins?
@@ -406,7 +443,7 @@ namespace mset {
 
 			//this is always called in EditorUpdate, only run if forced externally
 			if(forceApply && _GlobalSky) {
-				_GlobalSky.Apply();
+				_GlobalSky.Apply(0);
 				if(_SkyboxMaterial) {
 					_GlobalSky.Apply(_SkyboxMaterial, 0);
 				}
@@ -471,10 +508,14 @@ namespace mset {
 				foreach(mset.SkyApplicator app in skiesToRemove) {
 					skyApplicators.Remove(app);
 				}
-			
-				foreach(Renderer rend in globalSkyChildren) {
-					if(!rend) continue;
-					GlobalBlender.Apply(rend);
+
+				if(GlobalBlender.IsBlending || GlobalBlender.CurrentSky.Dirty) {
+					foreach(Renderer rend in globalSkyChildren) {
+						if(!rend) continue;
+						mset.SkyAnchor anchor = rend.GetComponent<mset.SkyAnchor>();
+						if(anchor != null)	GlobalBlender.Apply(rend, anchor.materials);
+						else 				GlobalBlender.Apply(rend, rend.materials);
+					}
 				}
 			
 				int renderCheckCount = 0;
@@ -489,21 +530,26 @@ namespace mset {
 
 					if(rend == null || rend.gameObject == null) {
 						rendsToRemove.Add(rend); //clear deleted renderers (this will totally happen)
+						continue;
 					}
-					else {
-						renderCheckIterator++;
-						if(!forceApply && renderCheckCount > 50) {
-							renderCheckCount = 0;
-							renderCheckIterator--;
-							break;
-						}
 
-						mset.SkyAnchor anchor = rend.GetComponent<mset.SkyAnchor>();
-						if(anchor.HasChanged) {
-							renderCheckCount++;
-							anchor.HasChanged = false;
-							ApplyCorrectSky(rend);
-						}
+					if(!rend.gameObject.activeInHierarchy) {
+						continue;
+					}
+
+					renderCheckIterator++;
+					if(!forceApply && renderCheckCount > 50) {
+						renderCheckCount = 0;
+						renderCheckIterator--;
+						break;
+					}
+
+					mset.SkyAnchor anchor = rend.GetComponent<mset.SkyAnchor>();
+					if(anchor.HasChanged) {
+						renderCheckCount++;
+						anchor.HasChanged = false;
+						if(this.AutoMaterial) anchor.UpdateMaterials();
+						ApplyCorrectSky(rend);
 					}
 				}
 				foreach(Renderer rend in rendsToRemove) {
@@ -514,6 +560,8 @@ namespace mset {
 					renderCheckIterator = 0;
 				}
 			}
+
+			_GlobalSky.Dirty = false;
 		}
 
 		#if UNITY_EDITOR
@@ -577,10 +625,13 @@ namespace mset {
 		#endif
 
 		//PROBING
-		#if UNITY_EDITOR
+
+		//Now available in REAL TIME!
+		//#if UNITY_EDITOR
 		public mset.Sky[] SkiesToProbe = null;
 		public Vector4 ProbeExposures = Vector4.one;
-		public bool ProbeWithCubeRT = true;
+		public bool ProbeWithCubeRT = true;		
+		public bool ProbeOnlyStatic = false;
 
 		//Probes all skies in list of skies, and all sky components in list of game objects. Either list can be null when convenient.
 		//If probeAll is false, only skies marked as "Is Probe" are considered
@@ -612,8 +663,10 @@ namespace mset {
 				}
 			}
 			if(skipCount > 0) {
+				#if UNITY_EDITOR
 				bool k = UnityEditor.EditorUtility.DisplayDialog(skipCount + " skies not probes", "The following skies are not marked as probes and will be skipped:\n"+notProbes, "Ok", "Cancel");
 				if(!k) return;
+				#endif
 			}
 			if(probes.Count > 0) {				
 				this.ProbeExposures = probeIBL ? Vector4.one : Vector4.zero;
@@ -623,6 +676,6 @@ namespace mset {
 				}
 			}
 		}
-		#endif
+		//#endif
 	}
 }

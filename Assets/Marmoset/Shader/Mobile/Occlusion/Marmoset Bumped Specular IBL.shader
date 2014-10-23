@@ -45,7 +45,7 @@ Shader "Marmoset/Mobile/Occlusion/Bumped Specular IBL" {
 		
 		#pragma multi_compile MARMO_SKY_BLEND_OFF MARMO_SKY_BLEND_ON
 		#if MARMO_SKY_BLEND_ON			
-			#define MARMO_SKY_BLEND
+		//	#define MARMO_SKY_BLEND
 		#endif
 
 		
@@ -97,7 +97,7 @@ Shader "Marmoset/Mobile/Occlusion/Bumped Specular IBL" {
 		
 		#pragma multi_compile MARMO_SKY_BLEND_OFF MARMO_SKY_BLEND_ON
 		#if MARMO_SKY_BLEND_ON			
-			#define MARMO_SKY_BLEND
+		//	#define MARMO_SKY_BLEND
 		#endif
 
 		

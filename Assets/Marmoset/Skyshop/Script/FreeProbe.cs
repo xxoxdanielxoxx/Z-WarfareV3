@@ -18,6 +18,8 @@ namespace mset {
 		public int maxExponent = 512;
 		public Vector4 exposures = Vector4.one;
 		public float convolutionScale = 1f;
+
+		private List<Camera> disabledCameras = new List<Camera>();
 		
 		private Cubemap _targetCube = null;
 		private Cubemap targetCube {
@@ -158,8 +160,14 @@ namespace mset {
 				camera.CopyFrom (Camera.main);
 				defaultCullMask = camera.cullingMask;
 			}
-			
-			foreach(Camera cam in Camera.allCameras) { cam.enabled = false; }
+		
+			disabledCameras.Clear();
+			foreach(Camera cam in Camera.allCameras) {
+				if(cam.enabled) {
+					cam.enabled = false; 
+					disabledCameras.Add(cam);
+				}
+			}
 			
 			camera.enabled = true;
 			camera.fieldOfView = 90;
@@ -231,8 +239,13 @@ namespace mset {
 				RenderSettings.skybox = this.sceneSkybox;
 				ClearQueue();
 				FreeFaceTexture();
-				if(DoneCallback != null) {
-					
+
+				foreach(Camera cam in disabledCameras) {
+					cam.enabled = true;
+				}
+				disabledCameras.Clear();
+
+				if(DoneCallback != null) {					
 					DoneCallback();
 					DoneCallback = null;
 				}

@@ -120,7 +120,7 @@ SubShader {
 		ENDCG
 	}
 }
-
+/*
 SubShader {
 	Pass {		
 		Fog { Mode Off }
@@ -177,6 +177,6 @@ SubShader {
 		} 
 	}
 }
-
+*/
 FallBack Off
 }

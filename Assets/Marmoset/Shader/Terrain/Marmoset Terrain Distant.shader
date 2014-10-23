@@ -28,7 +28,7 @@ Shader "Hidden/Marmoset/Terrain/Distant IBL" {
 		#pragma glsl
 		#pragma target 3.0
 		#pragma exclude_renderers d3d11_9x flash
-		#pragma surface MarmosetDistantSurf BlinnPhong
+		#pragma surface MarmosetDistantSurf BlinnPhong exclude_path:prepass noforwardadd approxview nodirlightmap
 		//gamma-correct sampling permutations
 				
 		#pragma multi_compile MARMO_TERRAIN_BLEND_OFF MARMO_TERRAIN_BLEND_ON
@@ -39,6 +39,7 @@ Shader "Hidden/Marmoset/Terrain/Distant IBL" {
 		#define MARMO_HQ
 		#define MARMO_SKY_ROTATION
 		#define MARMO_DIFFUSE_IBL
+		#define MARMO_DIFFUSE_BASE
 		
 		#include "../MarmosetCore.cginc"
 		

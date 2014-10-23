@@ -33,7 +33,11 @@ namespace mset {
 		}
 
 		public bool IsBlending {
-			get { return endStamp > Time.time; }
+			get { return Time.time < endStamp; }
+		}
+
+		public bool WasBlending(float secAgo) {
+			return (Time.time-secAgo) < endStamp;
 		}
 
 		//call on as many renderers as appropriate
@@ -61,17 +65,17 @@ namespace mset {
 			}
 		}
 		//call on as many renderers as appropriate
-		public void Apply(Renderer target) {
+		public void Apply(Renderer target, Material[] materials) {
 			if(IsBlending) {
-				mset.Sky.EnableBlending(target, true);
-				mset.Sky.EnableProjection(target, CurrentSky.HasDimensions || PreviousSky.HasDimensions);
-				CurrentSky.Apply(target, 0);
-				PreviousSky.Apply(target, 1);
+				mset.Sky.EnableBlending(target, materials, true);
+				mset.Sky.EnableProjection(target, materials, CurrentSky.HasDimensions || PreviousSky.HasDimensions);
+				CurrentSky.ApplyFast(target, 0);
+				PreviousSky.ApplyFast(target, 1);
 				mset.Sky.SetBlendWeight(target, BlendWeight);
 			} else {
-				mset.Sky.EnableBlending(target, false);
-				mset.Sky.EnableProjection(target, CurrentSky.HasDimensions);
-				CurrentSky.Apply(target,0);
+				mset.Sky.EnableBlending(target, materials, false);
+				mset.Sky.EnableProjection(target, materials, CurrentSky.HasDimensions);
+				CurrentSky.ApplyFast(target,0);
 			}
 		}
 		//call in addition to Apply()
@@ -107,6 +111,10 @@ namespace mset {
 					blendTimer = currentBlendTime;
 				}
 			}
+		}
+
+		public void SkipTime(float sec) {
+			blendTimer = blendTimer - sec;
 		}
 	}
 }

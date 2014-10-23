@@ -81,26 +81,6 @@ Shader "Marmoset/Nature/Tree Soft Occlusion Bark" {
 			ENDCG	
 		}
 	}
-	
-	SubShader {
-		Tags {
-			"IgnoreProjector"="True"
-			"RenderType" = "TreeOpaque"
-		}
-
-		Pass {
-			CGPROGRAM
-			#pragma exclude_renderers shaderonly
-			#pragma vertex bark
-			#include "SH_Vertex.cginc"
-			ENDCG
-			
-			Lighting On
-						
-			SetTexture [_MainTex] { combine primary * texture DOUBLE, constant }
-		}
-	}
-	
 	SubShader {
 		Tags {
 			"IgnoreProjector"="True"

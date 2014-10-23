@@ -27,10 +27,10 @@ Shader "Marmoset/Vertex Lit/Specular Occ IBL" {
 			#pragma exclude_renderers flash
 			#pragma fragmentoption ARB_precision_hint_fastest
 					
-			#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
-			#if MARMO_BOX_PROJECTION_ON	
-				#define MARMO_BOX_PROJECTION
-			#endif
+			//#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
+			//#if MARMO_BOX_PROJECTION_ON	
+			//	#define MARMO_BOX_PROJECTION
+			//#endif
 		
 			#pragma multi_compile MARMO_SKY_BLEND_OFF MARMO_SKY_BLEND_ON
 			#if MARMO_SKY_BLEND_ON			
@@ -73,10 +73,10 @@ Shader "Marmoset/Vertex Lit/Specular Occ IBL" {
 			#pragma fragmentoption ARB_precision_hint_fastest
 			//gamma-correct sampling permutations
 					
-			#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
-			#if MARMO_BOX_PROJECTION_ON	
-				#define MARMO_BOX_PROJECTION
-			#endif
+			//#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
+			//#if MARMO_BOX_PROJECTION_ON	
+			//	#define MARMO_BOX_PROJECTION
+			//#endif
 		
 			#pragma multi_compile MARMO_SKY_BLEND_OFF MARMO_SKY_BLEND_ON
 			#if MARMO_SKY_BLEND_ON			

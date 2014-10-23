@@ -2,8 +2,10 @@
 // Copyright 2013 Marmoset LLC
 // http://marmoset.co
 
-//causes material property issues pre 4.5 and causes 2D sprites to render white
-//#define USE_PROPERTY_BLOCKS
+//WARNING: causes material property issues in OSX and anything pre 4.5
+#if !UNITY_STANDALONE_OSX
+#define USE_PROPERTY_BLOCKS
+#endif
 
 using UnityEngine;
 using System.Collections;
@@ -132,16 +134,20 @@ namespace mset {
 		}
 
 		public mset.SHEncoding SH = new mset.SHEncoding();
+		public mset.SHEncodingFile CustomSH = null;
 
 		private Matrix4x4 skyMatrix = Matrix4x4.identity;
 		private Matrix4x4 invMatrix = Matrix4x4.identity;
 		private Vector4 exposures = Vector4.one;
 		private Vector4 exposuresLM = Vector4.one;
 
+		private Vector4 skyMin = -Vector4.one;
+		private Vector4 skyMax =  Vector4.one;
+
 		//sets of shader parameters for each layer of blending
 		private ShaderIDs[] blendIDs = { new ShaderIDs(), new ShaderIDs() };
 		#if USE_PROPERTY_BLOCKS
-		private MaterialPropertyBlock propBlock = null;
+		private static MaterialPropertyBlock propBlock = null;
 		#endif
 
 		[SerializeField]
@@ -189,69 +195,75 @@ namespace mset {
 		}
 		//per-renderer apply
 		public void Apply(Renderer target) { Apply(target, 0); }
+
 		public void Apply(Renderer target, int blendIndex) {
-			// Binds IBL data, exposure, and a skybox texture globally or to a specific game object
 			if(target && this.enabled && this.gameObject.activeInHierarchy) {
-				UpdateSkyTransform();
-				UpdateExposures();
-				#if USE_PROPERTY_BLOCKS
-					if(propBlock == null) propBlock = new MaterialPropertyBlock();
-					if(blendIndex == 0) {
-						propBlock.Clear();
-					} else {
-						target.GetPropertyBlock(propBlock);						
-					}
-					ApplyToBlock(propBlock, this.blendIDs[blendIndex]);
-					target.SetPropertyBlock(propBlock);
-				#else
-					#if UNITY_EDITOR
-						if(Application.isPlaying) {
-							foreach(Material mat in target.materials) {
-								Apply(mat, blendIndex);
-							}
-						} else {
-							foreach(Material mat in target.sharedMaterials) {
-								if(mat) Apply(mat, blendIndex);
-							}
-						}
-					#else
+				ApplyFast(target, blendIndex);
+			}
+		}
+
+		public void ApplyFast(Renderer target, int blendIndex) {
+			// Binds IBL data, exposure, and a skybox texture globally or to a specific game object
+			#if USE_PROPERTY_BLOCKS
+				if(propBlock == null) propBlock = new MaterialPropertyBlock();
+				if(blendIndex == 0) {
+					propBlock.Clear();
+				} else {
+					target.GetPropertyBlock(propBlock);						
+				}
+				ApplyToBlock(ref propBlock, this.blendIDs[blendIndex]);
+				target.SetPropertyBlock(propBlock);
+			#else
+				#if UNITY_EDITOR
+					if(Application.isPlaying) {
 						foreach(Material mat in target.materials) {
 							Apply(mat, blendIndex);
 						}
-					#endif
+					} else {
+						foreach(Material mat in target.sharedMaterials) {
+							if(mat) Apply(mat, blendIndex);
+						}
+					}
+				#else
+					foreach(Material mat in target.materials) {
+						Apply(mat, blendIndex);
+					}
 				#endif
-			}
+			#endif
 		}
 		//per-renderer apply
 		public void Apply(Material target) { Apply(target, 0); }
 		public void Apply(Material target, int blendIndex) {
 			// Binds IBL data, exposure, and a skybox texture globally or to a specific game object
 			if(target && this.enabled && this.gameObject.activeInHierarchy) {
-				UpdateSkyTransform();
-				UpdateExposures();
 				ApplyToMaterial(target, this.blendIDs[blendIndex]);
 			}
 		}
 
-		private void ApplyToBlock(MaterialPropertyBlock block, ShaderIDs bids) {
+		private void ApplyToBlock(ref MaterialPropertyBlock block, ShaderIDs bids) {
 			#if USE_PROPERTY_BLOCKS
-			block.AddVector(bids.exposureIBL,	this.exposures);
-			block.AddVector(bids.exposureLM,	this.exposuresLM);
+			block.AddVector(bids.exposureIBL,	exposures);
+			block.AddVector(bids.exposureLM,	exposuresLM);
 
-			block.AddMatrix(bids.skyMatrix,		this.skyMatrix);
-			block.AddMatrix(bids.invSkyMatrix,	this.invMatrix);
+			block.AddMatrix(bids.skyMatrix,		skyMatrix);
+			block.AddMatrix(bids.invSkyMatrix,	invMatrix);
 
-			UpdateSkySize();
-			block.AddVector(bids.skyMin, this.skyMin);
-			block.AddVector(bids.skyMax, this.skyMax);			
+			block.AddVector(bids.skyMin, skyMin);
+			block.AddVector(bids.skyMax, skyMax);			
 
-			if(specularCube) block.AddTexture(bids.specCubeIBL,	this.specularCube);
-			else 			 block.AddTexture(bids.specCubeIBL,	this.blackCube);
-			//if(skyboxCube)	 block.AddTexture(bids.skyCubeIBL, this.skyboxCube);
+			if(specularCube) block.AddTexture(bids.specCubeIBL, specularCube);
+			else 			 block.AddTexture(bids.specCubeIBL, blackCube);
 
-			for(int i=0; i<9; ++i) {
-				block.AddVector(bids.SH[i],	this.SH.cBuffer[i]);
-			}
+			block.AddVector(bids.SH[0],	SH.cBuffer[0]);
+			block.AddVector(bids.SH[1],	SH.cBuffer[1]);
+			block.AddVector(bids.SH[2],	SH.cBuffer[2]);
+			block.AddVector(bids.SH[3],	SH.cBuffer[3]);
+			block.AddVector(bids.SH[4],	SH.cBuffer[4]);
+			block.AddVector(bids.SH[5],	SH.cBuffer[5]);
+			block.AddVector(bids.SH[6],	SH.cBuffer[6]);
+			block.AddVector(bids.SH[7],	SH.cBuffer[7]);
+			block.AddVector(bids.SH[8], SH.cBuffer[8]);
+
 			#endif
 		}
 
@@ -261,7 +273,6 @@ namespace mset {
 			mat.SetMatrix(bids.skyMatrix,		this.skyMatrix);
 			mat.SetMatrix(bids.invSkyMatrix,	this.invMatrix);
 
-			UpdateSkySize();
 			mat.SetVector(bids.skyMin, skyMin);
 			mat.SetVector(bids.skyMax, skyMax);
 					
@@ -273,26 +284,10 @@ namespace mset {
 			}
 		}
 
-		private Vector4 skyMin = -Vector4.one;
-		private Vector4 skyMax =  Vector4.one;
-		private void UpdateSkySize() {
-			if(this.HasDimensions) {
-				skyMin = this.Dimensions.center - this.Dimensions.extents;
-				skyMax = this.Dimensions.center + this.Dimensions.extents;
-				Vector3 scale = this.transform.localScale;
-				skyMin.x *= scale.x;	skyMin.y *= scale.y;	skyMin.z *= scale.z;
-				skyMax.x *= scale.x;	skyMax.y *= scale.y;	skyMax.z *= scale.z;
-			} else {
-				skyMax = Vector4.one * 100000f;
-				skyMin = Vector4.one *-100000f;
-			}
-		}
-
 		private void ApplySkyTransform(ShaderIDs bids) {
 			Shader.SetGlobalMatrix(bids.skyMatrix, skyMatrix);
 			Shader.SetGlobalMatrix(bids.invSkyMatrix, invMatrix);
 
-			UpdateSkySize();
 			Shader.SetGlobalVector(bids.skyMin, skyMin);
 			Shader.SetGlobalVector(bids.skyMax, skyMax);
 		}
@@ -301,7 +296,6 @@ namespace mset {
 			Shader.SetGlobalMatrix(bids.skyMatrix, skyMatrix);
 			Shader.SetGlobalMatrix(bids.invSkyMatrix, invMatrix);
 
-			UpdateSkySize();
 			Shader.SetGlobalVector(bids.skyMin, skyMin);
 			Shader.SetGlobalVector(bids.skyMax, skyMax);
 
@@ -333,12 +327,11 @@ namespace mset {
 			internalProjectionSupport = enable;
 		}
 		//renderer
-		public static void EnableProjection(Renderer target, bool enable) {
+		public static void EnableProjection(Renderer target, Material[] mats, bool enable) {
 			#if !(UNITY_4_0 || UNITY_4_1 || UNITY_4_2)
 			if(!internalProjectionSupport) return;
-			//Material[] mats = getTargetMaterials(target);
+			if(mats == null) return;
 			if(enable) {
-				Material[] mats = target.sharedMaterials;
 				foreach(Material mat in mats) {
 					if(mat) {
 						mat.DisableKeyword("MARMO_BOX_PROJECTION_OFF");
@@ -346,8 +339,6 @@ namespace mset {
 					}
 				}
 			} else {
-				//fragment materials only on disable
-				Material[] mats = getTargetMaterials(target);
 				foreach(Material mat in mats) {
 					if(mat) {
 						mat.DisableKeyword("MARMO_BOX_PROJECTION_ON");
@@ -398,10 +389,10 @@ namespace mset {
 
 		//renderer
 		//NOTE: renderer and material enabling fragments materials! These should be in PropertyBlocks but they're not
-		public static void EnableBlending(Renderer target, bool enable) {
+		public static void EnableBlending(Renderer target, Material[] mats, bool enable) {
 			#if !(UNITY_4_0 || UNITY_4_1 || UNITY_4_2)
+			if(mats == null) return;
 			if(!internalBlendingSupport) return;
-			Material[] mats = getTargetMaterials(target);
 			if(enable) {
 				foreach(Material mat in mats) {
 					if(mat) {
@@ -441,11 +432,13 @@ namespace mset {
 		//renderer
 		public static void SetBlendWeight(Renderer target, float weight) {
 			#if USE_PROPERTY_BLOCKS
+			if( propBlock == null ) propBlock = new MaterialPropertyBlock();
+			else propBlock.Clear();
 			//NOTE: this expects the property block to be cleared prior to being called or the weight property will accumulate every frame!
-			MaterialPropertyBlock block = new MaterialPropertyBlock();
-			target.GetPropertyBlock(block);
-			block.AddFloat("_BlendWeightIBL", weight);
-			target.SetPropertyBlock(block);
+			//MaterialPropertyBlock block = new MaterialPropertyBlock();
+			target.GetPropertyBlock(propBlock);
+			propBlock.AddFloat("_BlendWeightIBL", weight);
+			target.SetPropertyBlock(propBlock);
 			#else
 			Material[] mats = getTargetMaterials(target);
 			foreach(Material mat in mats) {
@@ -492,6 +485,19 @@ namespace mset {
 			Light[] lights = this.GetComponentsInChildren<Light>();
 			for(int i = 0; i < lights.Length; ++i) {
 				lights[i].enabled = enable;
+			}
+		}
+
+		private void UpdateSkySize() {
+			if(this.HasDimensions) {
+				skyMin = this.Dimensions.center - this.Dimensions.extents;
+				skyMax = this.Dimensions.center + this.Dimensions.extents;
+				Vector3 scale = this.transform.localScale;
+				skyMin.x *= scale.x;	skyMin.y *= scale.y;	skyMin.z *= scale.z;
+				skyMax.x *= scale.x;	skyMax.y *= scale.y;	skyMax.z *= scale.z;
+			} else {
+				skyMax = Vector4.one * 100000f;
+				skyMin = Vector4.one *-100000f;
 			}
 		}
 
@@ -562,19 +568,22 @@ namespace mset {
 		//on enable or activate
 		private void OnEnable() {
 			//finalize or allocate serialized properties here
-			if(SH == null)
-				SH = new mset.SHEncoding();
+			if(SH == null) SH = new mset.SHEncoding();
+			if(this.CustomSH != null) SH.copyFrom(this.CustomSH.SH);
 			SH.copyToBuffer();
 		}
 
 		private void OnLevelWasLoaded(int level) {
 			UpdateExposures();
 			UpdateSkyTransform();
+			UpdateSkySize();
 		}
 
 		private void Start() {
 			UpdateExposures();
 			UpdateSkyTransform();
+			UpdateSkySize();
+
 #if UNITY_ANDROID
 			if(!Application.isEditor) {
 				// on mobile devices all gloss levels are discarded
@@ -588,10 +597,20 @@ namespace mset {
 			if(transform.hasChanged) {
 				Dirty = true;
 				UpdateSkyTransform();
+				UpdateSkySize(); //this shouldn't change at runtime, skies are supposed to be static
 				transform.hasChanged = false;
 			}
+			UpdateExposures();
 		}
 
+#if UNITY_EDITOR
+		public void EditorUpdate() {
+			UpdateSkyTransform();
+			UpdateExposures();
+			UpdateSkySize();
+
+		}
+#endif
 		//script instance is destroyed
 		private void OnDestroy() {
 			SH = null;

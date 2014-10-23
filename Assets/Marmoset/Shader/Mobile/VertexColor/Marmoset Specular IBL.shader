@@ -33,7 +33,7 @@ Shader "Marmoset/Mobile/Vertex Color/Specular IBL" {
 		#endif
 		
 		#pragma target 3.0
-		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert fullforwardshadows  approxview
+		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert exclude_path:prepass noforwardadd approxview
 		//mobile primary
 		#pragma only_renderers d3d9 opengl gles
 		#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON
@@ -87,7 +87,7 @@ Shader "Marmoset/Mobile/Vertex Color/Specular IBL" {
 		#endif
 		
 		#pragma target 3.0
-		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert fullforwardshadows  approxview
+		#pragma surface MarmosetSurf MarmosetDirect vertex:MarmosetVert exclude_path:prepass noforwardadd approxview
 		//mobile secondary
 		#pragma only_renderers d3d9 opengl gles d3d11 d3d11_9x				
 		#pragma multi_compile MARMO_BOX_PROJECTION_OFF MARMO_BOX_PROJECTION_ON

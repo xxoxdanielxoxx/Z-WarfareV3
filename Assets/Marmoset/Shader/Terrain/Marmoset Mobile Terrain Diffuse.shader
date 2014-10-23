@@ -46,7 +46,8 @@ SubShader {
 	#pragma target 3.0
 	
 	//NOTE: BlinnPhong instead of MarmosetDirect is fine here, MarmosetDirect is only needed for RGB specular
-	#pragma surface MarmosetTerrainSurf Lambert vertex:MarmosetTerrainVert fullforwardshadows addshadow
+	#pragma surface MarmosetTerrainSurf Lambert vertex:MarmosetTerrainVert exclude_path:prepass noforwardadd approxview nodirlightmap
+	//addshadow
 	#pragma only_renderers d3d9 d3d11 opengl gles
 	#pragma multi_compile MARMO_TERRAIN_BLEND_OFF MARMO_TERRAIN_BLEND_ON
 	#if MARMO_TERRAIN_BLEND_ON			
@@ -58,6 +59,7 @@ SubShader {
 	#define MARMO_DIFFUSE_DIRECT	
 	#define MARMO_DIFFUSE_IBL	
 	#define MARMO_NORMALMAP
+	//#define MARMO_DIFFUSE_BASE
 	//#define MARMO_NORMALMAP_DETAIL
 	#define MARMO_SKY_ROTATION
 	#define MARMO_DIFFUSE_FRESNEL
@@ -70,7 +72,7 @@ SubShader {
 }
 
 Dependency "AddPassShader" = "Hidden/Marmoset/Terrain/Terrain IBL AddPass"
-Dependency "BaseMapShader" = "Hidden/Marmoset/Terrain/Distant IBL"
+Dependency "BaseMapShader" = "Hidden/Marmoset/Mobile/Terrain/Distant IBL"
 
 // Fallback to Unity terrain
 Fallback "Nature/Terrain/Diffuse"

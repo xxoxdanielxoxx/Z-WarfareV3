@@ -91,7 +91,11 @@ void MarmosetTerrainSurf (Input IN, inout SurfaceOutput OUT) {
 	fixed splatSum = dot(splat_control, fixed4(1,1,1,1));
 	
 	fixed4 diffBase;
-	diffBase = tex2D(_BaseTex, uv_Control);
+	#ifdef MARMO_DIFFUSE_BASE
+		diffBase = tex2D(_BaseTex, uv_Control);
+	#else
+		diffBase = fixed4(1.0,1.0,1.0,1.0);
+	#endif
 	
 	fixed4 diff;	
 	diff  = splat_control.r * tex2D (_Splat0, uv_Splat0);

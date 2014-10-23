@@ -80,12 +80,11 @@ namespace mset {
 		public bool ApplyInside(Renderer rend) {
 			if(this.TargetSky == null || !TriggerIsActive) return false;
 
-			Vector3 rendCenter = rend.bounds.center;
 			mset.SkyAnchor anchor = rend.gameObject.GetComponent<mset.SkyAnchor>();
 			if( anchor ) {
 				//TODO: is this necessary? this was never running before
 				if( anchor.BindType == mset.SkyAnchor.AnchorBindType.TargetSky && anchor.AnchorSky == TargetSky ) {
-					this.TargetSky.Apply(rend);
+					this.TargetSky.Apply(rend,0);
 					anchor.Apply();
 					return true;
 				}
@@ -97,16 +96,18 @@ namespace mset {
 				if(childApp.ApplyInside(rend)) return true;
 			}
 
-			if( anchor ) rendCenter = anchor.GetCenter();
+			Vector3 rendCenter = rend.bounds.center;
+			if( anchor ) anchor.GetCenter(ref rendCenter);
 			rendCenter = transform.worldToLocalMatrix.MultiplyPoint(rendCenter);
 
 			if( TriggerDimensions.Contains(rendCenter) ) {
-				this.TargetSky.Apply(rend);
+				this.TargetSky.Apply(rend,0);
 				return true;
 			}
 			return false;
 		}
 
+		private Vector3 _center;
 		public bool RendererInside(Renderer rend) {
 			//direct binding
 			mset.SkyAnchor anchor = rend.gameObject.GetComponent<mset.SkyAnchor>();
@@ -130,10 +131,10 @@ namespace mset {
 				anchor = rend.gameObject.AddComponent(typeof(mset.SkyAnchor)) as mset.SkyAnchor;
 			}
 
-			Vector3 rendCenter = anchor.GetCenter();
-			rendCenter = transform.worldToLocalMatrix.MultiplyPoint(rendCenter);
+			anchor.GetCenter(ref _center);
+			_center = transform.worldToLocalMatrix.MultiplyPoint(_center);
 
-			if(TriggerDimensions.Contains(rendCenter)) {
+			if(TriggerDimensions.Contains(_center)) {
 				if(!AffectedRenderers.Contains(rend)) {
 					AddRenderer(rend);
 					anchor.BlendToSky(TargetSky);
@@ -156,7 +157,7 @@ namespace mset {
 					//else
 					//rend.GetComponent<SkyAnchor>().BlendToSky(TargetSky);
 					//BlendToSky does not work here right now, it currently ignores the TargetSky == currSky case
-					TargetSky.Apply(rend);
+					TargetSky.Apply(rend,0);
 				}
 				TargetSky.Dirty = false;
 			}

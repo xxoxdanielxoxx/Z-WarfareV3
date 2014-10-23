@@ -33,7 +33,7 @@ namespace mset {
 				return _refSIM;
 			}
 		}
-				
+
 		[SerializeField] private float camExposure = 1f;
 		[SerializeField] private float masterIntensity = 1f;
 		[SerializeField] private float skyIntensity = 1f;
@@ -66,6 +66,8 @@ namespace mset {
 		public void OnEnable() {
 			mset.Sky sky = target as mset.Sky;
 			if(sky.SH == null) sky.SH = new mset.SHEncoding();
+			if(sky.CustomSH != null) sky.SH.copyFrom(sky.CustomSH.SH);
+			sky.SH.copyToBuffer();
 
 			camExposure = sky.CamExposure;
 			masterIntensity = sky.MasterIntensity;
@@ -97,13 +99,14 @@ namespace mset {
 			System.GC.Collect();
 		}
 		
-		private static bool skyToGUI(Texture skyCube, bool skyHDR, mset.SHEncoding skySH, mset.CubemapGUI cubeGUI, bool updatePreview) {
+		private static bool skyToGUI(Texture skyCube, bool skyHDR, mset.SHEncoding skySH, mset.CubemapGUI cubeGUI, string skyName, bool updatePreview) {
 			bool dirty = false;
 			bool dirtyGUI = false;
 			
 			//sky -> cubeGUI
 			dirtyGUI |= cubeGUI.HDR != skyHDR;
 			cubeGUI.HDR = skyHDR;
+			cubeGUI.skyName = skyName;
 
 			RenderTexture RT = skyCube as RenderTexture;
 			if(cubeGUI.input != skyCube) {
@@ -123,6 +126,7 @@ namespace mset {
 			if(RT && skySH != null) {
 				if(cubeGUI.SH != null && !skySH.equals(cubeGUI.SH)) {
 					cubeGUI.SH.copyFrom(skySH);
+					cubeGUI.SH.copyToBuffer();
 					//dirty = true;
 				}
 			}
@@ -145,13 +149,16 @@ namespace mset {
 			bool dirty = false;
 
 			//copy spherical harmonics if they've changed
-			if( skySH != null ) {
-				if(cubeGUI.SH == null) {
-					skySH.clearToBlack();
-					dirty = true;
-				} else if(!skySH.equals(cubeGUI.SH)) {
-					skySH.copyFrom(cubeGUI.SH);
-					dirty = true;
+			if( cubeGUI.computeSH ) {
+				if( skySH != null ) {
+					if(cubeGUI.SH == null) {
+						skySH.clearToBlack();
+						dirty = true;
+					} else if(!skySH.equals(cubeGUI.SH)) {
+						skySH.copyFrom(cubeGUI.SH);
+						dirty = true;
+					}
+					skySH.copyToBuffer();
 				}
 			}
 
@@ -169,25 +176,20 @@ namespace mset {
 		}
 
 		public static void generateSH(ref mset.Sky sky) {
-			skyToGUI(sky.SkyboxCube, sky.HDRSky, null, refSKY, false);
-			skyToGUI(sky.SpecularCube, sky.HDRSpec, null, refSIM, false);
-			
-			if( refSIM.cube != null ) {
-				refSIM.update();
-				//refSIM.updateBuffers(); //Slow. Surely this is done after every change?
-				sky.SH.copyFrom( refSIM.SH );
-				mset.SHUtil.convolve(ref sky.SH);
-			}
-			//Don't compute from the sky, it's going to be very slow
-			/*else if( refSKY.cube != null ) {
-				refSKY.update();
-				//refSKY.updateBuffers(); //Slow. Surely this is done after every change?
-				sky.SH.copyFrom( refSKY.SH );
-				mset.SHUtil.convolve(ref sky.SH);
-			}*/
+			skyToGUI(sky.SkyboxCube, sky.HDRSky, null, refSKY, sky.name, false);
+			skyToGUI(sky.SpecularCube, sky.HDRSpec, null, refSIM, sky.name, false);
 
-			if( sky.SH != null ) {
-				sky.SH.copyToBuffer();
+			if( refSIM.computeSH ) {
+				if( refSIM.cube != null ) {
+					refSIM.update();
+					//refSIM.updateBuffers(); //Slow. Surely this is done after every change?
+					sky.SH.copyFrom( refSIM.SH );
+					mset.SHUtil.convolve(ref sky.SH);
+				}
+
+				if( sky.SH != null ) {
+					sky.SH.copyToBuffer();
+				}
 			}
 		}
 
@@ -312,8 +314,9 @@ namespace mset {
 			specIntensityLM = sky.SpecIntensityLM;
 			
 			//sync and sync from CubeGUIs
-
-			dirtyRef |= skyToGUI(sky.SkyboxCube, sky.HDRSky, sky.SH, refSKY, true);
+			refSIM.computeSH = (sky.CustomSH == null);
+			
+			dirtyRef |= skyToGUI(sky.SkyboxCube, sky.HDRSky, sky.SH, refSKY, sky.name, true);
 			bool prevHDR = sky.HDRSky;
 			bool currHDR = sky.HDRSky;
 			Texture refCube = sky.SkyboxCube;
@@ -321,14 +324,32 @@ namespace mset {
 			if(refCube != sky.SkyboxCube) sky.SkyboxCube = refCube;
 			if(currHDR != prevHDR) sky.HDRSky = currHDR;
 
-
-			dirtyRef |= skyToGUI(sky.SpecularCube, sky.HDRSpec, sky.SH, refSIM, true);
+			dirtyRef |= skyToGUI(sky.SpecularCube, sky.HDRSpec, sky.SH, refSIM, sky.name, true);
 			prevHDR = sky.HDRSpec;
 			currHDR = sky.HDRSpec;
 			refCube = sky.SpecularCube;
 			dirtyRef |= GUIToSky(ref refCube,  ref currHDR, sky.SH, refSIM);
 			if(refCube != sky.SpecularCube) sky.SpecularCube = refCube;
 			if(currHDR != prevHDR) sky.HDRSpec = currHDR;
+
+			EditorGUILayout.Space();
+			EditorGUILayout.BeginHorizontal();
+
+			string ashTip = "Accepts custom diffuse irradiance .asset files generated in other software (such as Knald Lys: www.knaldtech.com)\n\nWill override diffuse light generated from the specular cubemap.";
+			EditorGUILayout.LabelField(new GUIContent("Custom Diffuse SH (Optional)",ashTip), GUILayout.Width(248));
+			if( GUILayout.Button("None", GUILayout.Width(50), GUILayout.Height(14)) ) {
+				sky.CustomSH = null;
+				refSIM.computeSH = true;
+				refSIM.reloadReference();
+			}
+			EditorGUILayout.EndHorizontal();
+			
+			sky.CustomSH = EditorGUILayout.ObjectField(sky.CustomSH, typeof(mset.SHEncodingFile), false, GUILayout.Width(320)) as mset.SHEncodingFile;
+			if( sky.CustomSH != null ) {
+				sky.SH.copyFrom( sky.CustomSH.SH );
+				sky.SH.copyToBuffer();
+			}
+			refSIM.computeSH = (sky.CustomSH == null);
 
 			GUIStyle buttonStyle = new GUIStyle("Button");
 			buttonStyle.padding.top = buttonStyle.padding.bottom = 0;
@@ -396,11 +417,18 @@ namespace mset {
 			sky.IsProbe = EditorGUILayout.Toggle(new GUIContent("Is Probe", "Enable if this sky has been rendered from within the scene. The \"Probe All Skies\" feature will only process skies marked as probes."), sky.IsProbe);
 
 			bool prevProj = sky.HasDimensions;
-			bool boxProj = EditorGUILayout.Toggle(new GUIContent("Box Projected", "Use transform scale as the box projection dimensions of this sky. Only affects box-projected shaders for now."), sky.HasDimensions);
+			bool boxProj = EditorGUILayout.Toggle(new GUIContent("Box Projected", "Assign box dimensions to this sky for parallaxed specular reflection."), sky.HasDimensions);
 			if( boxProj != prevProj ) {
 				mset.EditorUtil.RegisterUndo(sky, "Box Projection Toggle");
 				sky.HasDimensions = boxProj;
 			}
+
+			EditorGUILayout.BeginHorizontal();
+			skymgr.ProbeOnlyStatic = EditorGUILayout.Toggle(new GUIContent("Probe Only Static Objects",""), skymgr.ProbeOnlyStatic);
+			EditorGUI.BeginDisabledGroup(true);
+			EditorGUILayout.LabelField("(Global Setting)", GUILayout.Width(320));
+			EditorGUI.EndDisabledGroup();
+			EditorGUILayout.EndHorizontal();
 
 			bool hasTrigger = app && app.TriggerIsActive;
 

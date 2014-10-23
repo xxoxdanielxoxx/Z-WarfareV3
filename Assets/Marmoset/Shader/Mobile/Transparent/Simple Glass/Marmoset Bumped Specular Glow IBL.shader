@@ -2,7 +2,7 @@
 // Copyright 2013 Marmoset LLC
 // http://marmoset.co
 
-Shader "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular Glow IBL" {
+Shader "Marmoset/Mobile/Transparent/Simple Glass/Specular Glow IBL" {
 	Properties {
 		_Color   ("Diffuse Color", Color) = (1,1,1,1)
 		_SpecColor ("Specular Color", Color) = (1,1,1,1)
@@ -11,7 +11,6 @@ Shader "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular Glow IBL" {
 		_Fresnel ("Fresnel Strength", Range(0.0,1.0)) = 0.0
 		_MainTex ("Diffuse(RGB) Alpha(A)", 2D) = "white" {}
 		_SpecTex ("Specular(RGB) Gloss(A)", 2D) = "white" {}
-		_BumpMap ("Normalmap", 2D) 	= "bump" {}
 		_GlowColor ("Glow Color", Color) = (1,1,1,1)
 		_GlowStrength("Glow Strength", Float) = 1.0
 		_EmissionLM ("Diffuse Emission Strength", Float) = 0.0
@@ -59,7 +58,7 @@ Shader "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular Glow IBL" {
 		#define MARMO_SPECULAR_IBL
 		#define MARMO_DIFFUSE_DIRECT
 		#define MARMO_SPECULAR_DIRECT
-		#define MARMO_NORMALMAP
+		//#define MARMO_NORMALMAP
 		#define MARMO_MIP_GLOSS
 		#define MARMO_GLOW
 		#define MARMO_ALPHA
@@ -113,7 +112,7 @@ Shader "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular Glow IBL" {
 		#define MARMO_SPECULAR_IBL
 		#define MARMO_DIFFUSE_DIRECT
 		#define MARMO_SPECULAR_DIRECT
-		#define MARMO_NORMALMAP
+		//#define MARMO_NORMALMAP
 		//#define MARMO_MIP_GLOSS
 		#define MARMO_GLOW
 		#define MARMO_ALPHA
@@ -128,5 +127,5 @@ Shader "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular Glow IBL" {
 		ENDCG
 	}
 	
-	FallBack "Marmoset/Mobile/Transparent/Simple Glass/Bumped Specular IBL"
+	FallBack "Marmoset/Mobile/Transparent/Simple Glass/Specular IBL"
 }

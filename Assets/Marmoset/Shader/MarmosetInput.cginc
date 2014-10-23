@@ -99,7 +99,7 @@ uniform float4	 	_MainTex3_ST;
 	#endif
 #endif
 
-#if defined(MARMO_OCCLUSION) || defined(MARMO_VERTEX_OCCLUSION)
+#if defined(MARMO_OCCLUSION) || defined(MARMO_VERTEX_OCCLUSION) || defined(MARMO_PACKED_VERTEX_OCCLUSION)
 uniform half		_OccStrength;
 #endif
 
@@ -161,7 +161,10 @@ uniform float4	 	_BumpMap3_ST;
 #endif
 //#endif
 
-#ifdef MARMO_GLOW
+#if defined(MARMO_DIFFUSE_GLOW_COMBINED)
+uniform float4		_EmissionColor;
+uniform float		_EmissionLM;
+#elif defined(MARMO_GLOW)
 uniform sampler2D	_Illum;
 uniform float4	 	_Illum_ST;
 uniform float4		_GlowColor;
@@ -169,29 +172,25 @@ uniform float		_GlowStrength;
 uniform float		_EmissionLM;
 #endif
 
-#ifdef MARMO_ALPHA_TEST
+
+#if defined(MARMO_ALPHA_TEST) || defined(MARMO_ALPHA_CLIP)
 uniform float		_Cutoff;
 #endif
 
 struct Input {	
 	float4 texcoord;
-	#ifdef MARMO_NORMALMAP
-		float3 worldNormal; //internal, required for the WorldNormalVector macro
-	#else
-		float3 worldN; //without normalmapping, Unity cannot be trusted to generate this right (android scale bug)	
-	#endif	
+	float3 worldNormal;
 	#if defined(MARMO_SPECULAR_DIRECT) || defined(MARMO_SPECULAR_IBL)
 		float3 viewDir;
 	#endif
-
 	#if defined(MARMO_SPECULAR_IBL) || defined(MARMO_BOX_PROJECTION)
-		float3 worldPos;
+		float4 worldP;
 	#endif
 	#if defined(MARMO_VERTEX_COLOR) || defined(MARMO_VERTEX_LAYER_MASK)
 		half4 color : COLOR;
 	#elif defined(MARMO_VERTEX_OCCLUSION)
 		half2 color : COLOR;
-	#endif	
+	#endif
 	#ifdef MARMO_DIFFUSE_VERTEX_IBL
 		float3 vertexIBL;
 	#endif	

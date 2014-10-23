@@ -48,7 +48,16 @@ namespace mset {
 			GUILayout.BeginHorizontal();
 			skmgr.GameAutoApply = GUILayout.Toggle(skmgr.GameAutoApply, new GUIContent("Auto-Apply in Game", "If enabled for game mode, Sky Manager will keep and constantly update a list of dynamic renderers in the scene, applying local skies to them as they move around.\n\nRequired for dynamic sky binding and Sky Applicator triggers."));
 			skmgr.EditorAutoApply = GUILayout.Toggle(skmgr.EditorAutoApply, new GUIContent("Auto-Apply in Editor (beta)","If enabled for edit mode, Sky Manager will apply local skies to renderers contained in their Sky Applicator trigger volumes.\n\nAffects editor viewport only."));
+			skmgr.AutoMaterial = GUILayout.Toggle (skmgr.AutoMaterial, new GUIContent("Dynamic Materials", "Periodically update the material caches in Sky Anchors. Enable if material lists of renderers are going to change at runtime (e.g. adding, removing, or replacing material references of renderers, property changes won't matter)."));
 			GUILayout.EndHorizontal();
+
+			//NOTE: The _ vars are stored in sky manager because they're part of the saved state. Pulling the list of layers from the bit mask instead of a full int array would sort the layer list every frame.
+			skmgr._IgnoredLayerCount = EditorGUILayout.IntField("Ignored Layer Count", skmgr._IgnoredLayerCount);
+			skmgr.IgnoredLayerMask = 0;
+			for(int i=0; i<skmgr._IgnoredLayerCount; ++i) {
+				skmgr._IgnoredLayers[i] = EditorGUILayout.LayerField(" ", skmgr._IgnoredLayers[i]);
+				skmgr.IgnoredLayerMask |= 1 << skmgr._IgnoredLayers[i];
+			}
 
 			GUILayout.BeginHorizontal();
 			if(GUILayout.Button(new GUIContent("Preview Auto-Apply","Updates editor viewport to show an accurate representation of which renderers will be bound to which skies in the game.\n\nEditor Auto-Apply performs this every frame."), GUILayout.Width(140))) {
@@ -56,12 +65,13 @@ namespace mset {
 				SceneView.RepaintAll();
 			}
 			GUILayout.EndHorizontal();
-			
+
+
 			EditorGUILayout.Space();
 
-			string camTip = "Sky probing is performed using the settings and clipping planes of this camera. If field is empty, Main Camera is used.";
-			skmgr.ProbeCamera = EditorGUILayout.ObjectField( new GUIContent("Probe with Camera", camTip), skmgr.ProbeCamera, typeof(Camera), true ) as Camera;
-
+			string staticTip = "If enabled, only GameObjects marked as \"Static\" will be rendered when capturing cubemaps.";
+			skmgr.ProbeOnlyStatic = GUILayout.Toggle(skmgr.ProbeOnlyStatic, new GUIContent("Probe Only Static Objects", staticTip));
+			
 			string dx11Tip = "Uses HDR render-textures to capture sky probes faster and with better quality.\n\nRequires project to be in Direct3D 11 mode while capturing.";
 			if(PlayerSettings.useDirect3D11) {
 				skmgr.ProbeWithCubeRT = GUILayout.Toggle(skmgr.ProbeWithCubeRT, new GUIContent("Probe Using Render-to-Cubemap",dx11Tip));
@@ -70,7 +80,11 @@ namespace mset {
 				GUILayout.Toggle(false, new GUIContent("Probe Using Render-to-Cubemap (Requires Direct3D11)",dx11Tip));
 				EditorGUI.EndDisabledGroup();
 			}
+
+			string camTip = "Sky probing is performed using the settings and clipping planes of this camera. If field is empty, Main Camera is used.";
+			skmgr.ProbeCamera = EditorGUILayout.ObjectField( new GUIContent("Probe with Camera", camTip), skmgr.ProbeCamera, typeof(Camera), true ) as Camera;
 			
+
 			GUILayout.BeginHorizontal();
 			if(GUILayout.Button(new GUIContent("Probe Skies (Direct)"), GUILayout.Width(140))) {
 				bool probeNonProbes = false;

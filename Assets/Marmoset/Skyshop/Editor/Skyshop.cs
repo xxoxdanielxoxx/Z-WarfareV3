@@ -726,8 +726,6 @@ public class Skyshop : EditorWindow {
 		ps.initMetric.end();
 	}
 
-
-
 	private void gatherLights(ref mset.CubeBuffer cube) {
 		ps.lights = new Color[cube.pixels.Length];
 		mset.CubeBuffer.pixelCopy(ref ps.lights, 0, cube.pixels, 0, cube.pixels.Length);

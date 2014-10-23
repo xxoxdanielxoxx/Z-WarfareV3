@@ -102,6 +102,7 @@ SubShader {
 	}
 }
 
+/*
 SubShader {
 	Pass {		
 		CGPROGRAM
@@ -151,6 +152,7 @@ SubShader {
 		} 
 	}
 }
+*/
 
 FallBack Off
 }

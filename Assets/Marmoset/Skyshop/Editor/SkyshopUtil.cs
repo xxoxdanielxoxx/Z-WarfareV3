@@ -87,6 +87,24 @@ public class SkyshopUtil {
 			if( currSky ) currSky.Apply();
 		}
 	}
+
+	/*
+	[MenuItem("Edit/Skyshop/Fix Unmarked Probes",false,1004)]
+	public static void FixProbes(){
+		mset.Sky[] skies = GameObject.FindObjectsOfType<mset.Sky>();
+		
+		mset.EditorUtil.RegisterUndo(skies as UnityEngine.Object[], "Fix Probes");
+		int fixedCount = 0;
+		foreach(mset.Sky sky in skies) {
+			if( sky && !sky.IsProbe && sky.SpecularCube && sky.SkyboxCube == null ) {
+				sky.IsProbe = true;
+				fixedCount++;
+			}
+		}
+		EditorUtility.DisplayDialog("Done Fixing!", "Fixed " + fixedCount + " unmarked probes.", "Ok");
+	}*/
+	
+
 		
 	private static bool conversionWarning(string scope, bool toMobile)					 { return conversionWarning(scope,toMobile,-1); }
 	private static bool conversionWarning(string scope, bool toMobile, int initialCount) {
@@ -188,6 +206,20 @@ public class SkyshopUtil {
 			if(newShader) {
 				mat.shader = newShader;
 				return true;
+			} else if(name.EndsWith(" Fast")) {
+				//see if this is a "Fast" shader that can convert to a non-fast
+				newShader = Shader.Find(name.Substring(0, name.Length-5));
+				if(newShader) {
+					mat.shader = newShader;
+					return true;
+				}
+			} else {
+				//see if there's a "Fast" version of this shader (usually 'Specular IBL Fast')
+				newShader = Shader.Find(name + " Fast");
+				if(newShader) {
+					mat.shader = newShader;
+					return true;
+				}
 			}
 		}
 		return false;

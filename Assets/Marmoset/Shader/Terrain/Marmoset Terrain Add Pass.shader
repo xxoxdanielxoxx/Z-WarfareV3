@@ -45,7 +45,9 @@ SubShader {
 	CGPROGRAM
 	#pragma glsl
 	#pragma target 3.0
-	#pragma surface MarmosetTerrainSurf Lambert vertex:MarmosetTerrainVert decal:add fullforwardshadows addshadow
+	#pragma surface MarmosetTerrainSurf Lambert vertex:MarmosetTerrainVert decal:add noforwardadd approxview nodirlightmap
+	// exclude_path:prepass
+	//fullforwardshadows addshadow
 	#pragma exclude_renderers d3d11_9x flash
 			
 	#pragma multi_compile MARMO_TERRAIN_BLEND_OFF MARMO_TERRAIN_BLEND_ON
@@ -61,6 +63,7 @@ SubShader {
 	//#define MARMO_SPECULAR_IBL
 	//#define MARMO_MIP_GLOSS
 	//#define MARMO_NORMALMAP
+	//#define MARMO_DIFFUSE_BASE
 	#define MARMO_SKY_ROTATION
 	#define MARMO_DIFFUSE_FRESNEL
 	//#define MARMO_FIRST_PASS
