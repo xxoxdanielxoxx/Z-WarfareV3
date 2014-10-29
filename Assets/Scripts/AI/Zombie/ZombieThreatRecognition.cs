@@ -26,7 +26,7 @@ public class ZombieThreatRecognition : MonoBehaviour
 				if (!m_behaviour.GetHealth().TakeDamage(bullet.GetDamage()))
 				{
 					// Zombie is dead
-					m_behaviour.GetStateMachine().ChangeState(ZombieStates.Dead);	// Potato: There's no dying animation, go directly to dead state. Do not pass GO.
+					m_behaviour.GetStateMachine().ChangeState(ZombieStates.Dying);	// Potato: There's no dying animation, go directly to dead state. Do not pass GO.
 				}
 				else
 				{
@@ -77,7 +77,7 @@ public class ZombieThreatRecognition : MonoBehaviour
 				int pIdx = PlayerIDManager.Get().FindPlayerIndex( bullet.GetPlayerID());
 
 				// Zombie is dead
-				m_behaviour.GetStateMachine().ChangeState(ZombieStates.Dead);	// Potato: There's no dying animation, go directly to dead state. Do not pass GO.
+				m_behaviour.GetStateMachine().ChangeState(ZombieStates.Dying);	// Potato: There's no dying animation, go directly to dead state. Do not pass GO.
 
 				if (m_behaviour.m_Group != null)
 				{

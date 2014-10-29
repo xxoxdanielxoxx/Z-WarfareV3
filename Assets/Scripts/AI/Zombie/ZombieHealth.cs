@@ -4,15 +4,15 @@ using System.Collections;
 public class ZombieHealth : MonoBehaviour 
 {
 	public int 		m_iHealth = -1;
+	public bool		m_bWince = false;
 
-	private float t = 1;
+	private float t = 0;
 
-	bool m_bChange = false;
 	public bool TakeDamage(int _dmg)
 	{
 		m_iHealth -= _dmg;
-		m_bChange = true;
-		t = 0.1f;
+		m_bWince = true;
+		t = 0.0f;
 		
 		//this.gameObject.renderer.material.color = Color.red;
 
@@ -24,22 +24,13 @@ public class ZombieHealth : MonoBehaviour
 
 	void Update()
 	{
-		if(m_bChange)
-		{
-
-			t -= Time.deltaTime;
-			if (t < 0)
-			{
-				//White();
-			}
-		}
 
 	}
 
-	void White()
+	void TakenDamage()
 	{
-		this.gameObject.renderer.material.color = Color.white;
-		m_bChange = false;
+		m_bWince = false;
+
 	}
 
 }

@@ -164,15 +164,115 @@ public class ZombieAI : MonoBehaviour
 			return;
 		}
 
-		// If health is no a negative number then it's still alive so do things
+		if (m_StateScript.m_State == ZombieStates.Dying)
+		{
+			if (animation.isPlaying && !animation.IsPlaying("death1"))
+			{
+				animation.Play("death1");
+				m_MovementScript.agent.speed = 0.0f;
+			}
+			else if (!animation.isPlaying)
+			{
+				m_StateScript.ChangeState(ZombieStates.Dead);
+			}
+
+			return;
+		}
+
+		MajorStateLogic();
+	}
+
+	void MajorStateLogic()
+	{
+		// If health is not a negative number then it's still alive so do things
 		if (m_HealthScript.m_iHealth >= 0)	
 		{
+			float distToClosest = float.MaxValue;
+			int idx = -1;
+			Vector3 vecToPlayer = Vector3.zero;
+			
+			for (int i = 0; i < AIMaster.m_Reference.players.Length; ++i)
+			{
+				vecToPlayer = GroupAI.m_Master.players[i].transform.position - this.gameObject.transform.position;
+				float dist = vecToPlayer.magnitude;
+				
+				if (dist < 2.5f && dist < distToClosest)
+				{
+					distToClosest = dist;
+					idx = i;
+				}
+			}
+			
+			if (distToClosest < 2.51f)	// A player in striking range musta been found
+			{
+				if ( m_StateScript.m_prevState == ZombieStates.Dead)
+				{
+					this.transform.rotation.SetLookRotation(vecToPlayer.normalized);
+					m_MovementScript.agent.destination = this.transform.position;
+					m_StateScript.m_prevState = m_StateScript.m_State;
+					m_StateScript.m_State = ZombieStates.Attack;
+				}
+				
+				
+				if (animation.isPlaying && !animation.IsPlaying("clawsAttackL"))
+				{
+					animation.Play("clawsAttackL");
+				}
+				else if (!animation.isPlaying)
+				{
+					m_StateScript.m_State = m_StateScript.m_prevState;
+					m_StateScript.m_prevState = ZombieStates.Dead;
+					
+					AIMaster.m_Reference.players[idx].GetComponent<Health>().m_fHealth -= 10;
+				}
+				return;
+			}
+			
+			
+			if (m_HealthScript.m_bWince)
+			{
+				if ( m_StateScript.m_prevState == ZombieStates.Dead)
+				{
+					m_StateScript.m_prevState = m_StateScript.m_State;
+					m_StateScript.m_State = ZombieStates.GetHit;
+					m_MovementScript.agent.destination = this.transform.position;
+				}
+				
+				if (animation.isPlaying && !animation.IsPlaying("getHit"))
+				{
+					animation.Play("getHit");
+					animation["getHit"].speed = 1.5f;
+				}
+				else if (!animation.isPlaying)
+				{
+					m_HealthScript.m_bWince = false;
+					m_StateScript.m_State = m_StateScript.m_prevState;
+					m_StateScript.m_prevState = ZombieStates.Dead;
+				}
+				
+				return;
+			}
+			else
+			{
+				if ( m_StateScript.m_prevState != ZombieStates.Dead)
+				{
+					m_HealthScript.m_bWince = false;
+					m_StateScript.m_State = m_StateScript.m_prevState;
+					m_StateScript.m_prevState = ZombieStates.Dead;
+				}
+			}
+			
 			if (m_StateScript.m_State == ZombieStates.Wander)
 			{
 				// This is the default state of the zombies. In this state zombies will move a at slow pace
 				//towards the players though not directly at the players unless they are bunched up (due to the calculation)
 				//will transition to the runnning state when the zombie has over 70% threat on one target
-
+				
+				if (!animation.IsPlaying("walk"))
+				{
+					animation.Play("walk");
+				}
+				
 				if (m_Group == null)
 				{
 					m_StateScript.m_State = ZombieStates.LFG;
@@ -191,7 +291,7 @@ public class ZombieAI : MonoBehaviour
 						m_StateScript.m_State = ZombieStates.Run;	// Set the state to Run
 						m_MovementScript.NavMeshSpeed(m_MovementScript.m_fRunSpeed); // Go at a nice pace :^)
 						m_ThreatLogic.m_TargetIdx = i;	// Keep track of who I'm charging towards
-
+						
 						if (m_Group != null)
 							m_Group.RemoveZombie(this);	// Get it off of the group list
 					}
@@ -201,9 +301,15 @@ public class ZombieAI : MonoBehaviour
 			{
 				// The zombie will charge at a high threat target. When it gets close enough it will never change targets
 				// The way the zombie moves should change as well; Zombie should move towards the player with intent to kill
-
+				
+				if (!animation.IsPlaying("run"))
+				{
+					animation.Play("run");
+					animation["run"].speed = 1.75f;
+				}
+				
 				m_MovementScript.PathUpdate(m_ThreatLogic, PlayerPositionMiddle());
-
+				
 				// If the zombie gets close to it's target then the state should transition to lock on
 				float dist = (this.gameObject.transform.position - GroupAI.m_Master.players[m_ThreatLogic.m_TargetIdx].transform.position).magnitude;
 				if (dist < 5.5f)
@@ -216,30 +322,41 @@ public class ZombieAI : MonoBehaviour
 			{
 				// Either kill the target, or die.
 				// Ignore all hate, otherwise same as run?
-
+				
+				if (!animation.IsPlaying("run")  && !m_HealthScript.m_bWince)
+				{
+					animation.Play("run");
+					animation["run"].speed = 1.75f;
+				}
+				
 				m_MovementScript.PathUpdate(m_ThreatLogic, PlayerPositionMiddle());
-
+				
 			}
 			else if (m_StateScript.m_State == ZombieStates.LFG)
 			{
 				// Potato Idea: Hey, what if the zombies in this state avoided the player. 
 				//   Stay within sight of the group, but try to hide from the player and try to get in range of other zombies
-
+				
+				if (!animation.IsPlaying("walk"))
+				{
+					animation.Play("walk");
+				}
+				
 				AIMaster master = AIMaster.m_Reference;
 				ZombieAI zomb = null;
-
+				
 				// These varibles only really matter in the if the zombie is too far away to make a group case
 				ZombieAI cZomb = null;	// Zombie closest to this zombie
 				float cDist = float.MaxValue;	// The distance to the closest zombie
 				float dist  = float.MaxValue;	// Distance to the zombie we're checking
-
+				
 				// Figure out what I want to do to have this zombie find another group
 				for (int i = 0; i < 32; ++i)
 				{
 					if ( master.IsZombieAlive(i))	// The zombie we're checking is alive
 					{
 						zomb = master.m_Zombs[i];
-
+						
 						if ((zomb.transform.position - this.transform.position).magnitude < 60)	// The two zombies are in a close distance of each other. Group up
 						{
 							if (zomb.m_Group == null)	// The zombie we're checking doesn't have a group
@@ -247,7 +364,7 @@ public class ZombieAI : MonoBehaviour
 								if (this.m_Group != null)	// if I do then add the other zombie to this group
 								{
 									m_Group.AddZombie(zomb);
-
+									
 									break;
 								}
 								else 	// If I don't either than create a new group and add both the zombies
@@ -256,7 +373,7 @@ public class ZombieAI : MonoBehaviour
 									m_Group = master.m_Groups[master.m_Groups.Count-1];
 									m_Group.AddZombie(this);
 									m_Group.AddZombie(zomb);
-
+									
 									break;
 								}
 							}
@@ -267,14 +384,14 @@ public class ZombieAI : MonoBehaviour
 									if (zomb.m_Group.m_iIndex != this.m_Group.m_iIndex)	// Make sure they aren't the same group
 									{
 										zomb.m_Group.MergeGroup(m_Group);	// Since I'm the one looking for a group, I'll join the other group
-									
+										
 										break;
 									}
 								}
 								else 	// I don't have a group, I need to be added to the other zombie group
 								{
 									zomb.m_Group.AddZombie(this);
-
+									
 									break;
 								}
 							}
@@ -283,7 +400,7 @@ public class ZombieAI : MonoBehaviour
 						else 	// Zombie isn't close enough to group up. But maybe if I can't find anyone to group up with them then I can still join this zombie
 						{
 							dist = (zomb.transform.position - this.transform.position).magnitude;
-
+							
 							if (dist < cDist)
 							{
 								cZomb = zomb;
@@ -291,13 +408,13 @@ public class ZombieAI : MonoBehaviour
 							}
 						}
 					}
-
+					
 					if (master.ZombiesActive <= i-1)
 					{
 						break;
 					}
 				}	// End of for loop going through every zombie
-
+				
 				// If there was no zombie around me to group up with then just move to the closest zombie
 				if (cZomb != null)
 					m_MovementScript.agent.SetDestination(cZomb.transform.position);

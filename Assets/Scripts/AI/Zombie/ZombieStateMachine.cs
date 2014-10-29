@@ -9,7 +9,8 @@ public enum ZombieStates
 	LFG		= 3,
 	Attack	= 4,
 	Dying	= 5,
-	Dead	= 6,
+	GetHit	= 6,
+	Dead	= 7,
 };
 
 public class ZombieStateMachine : MonoBehaviour 
@@ -19,6 +20,7 @@ public class ZombieStateMachine : MonoBehaviour
 
 	// The state of the zombie
 	public ZombieStates m_State;
+	public ZombieStates m_prevState;	// Incase I want to transistion back
 
 	public void Init(ZombieAI _zombAI)
 	{
@@ -28,13 +30,13 @@ public class ZombieStateMachine : MonoBehaviour
 	void Awake()
 	{
 		m_State = ZombieStates.Dead;
-
 	}
 
 	// Use this for initialization
 	public void Reset () 
 	{
 		m_State = ZombieStates.LFG;
+		m_prevState = ZombieStates.Dead;
 	}
 
 	public void ChangeState(ZombieStates _state)

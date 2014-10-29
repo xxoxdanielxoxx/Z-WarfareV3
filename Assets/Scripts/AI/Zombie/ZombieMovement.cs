@@ -28,6 +28,7 @@ public class ZombieMovement : MonoBehaviour
 	
 	public float 	m_fSpeed;		// Nav mesh Zombie walking speed
 	public float	m_fRunSpeed;	// Nav mesh Zombie running speed (at the target when it has one)
+	public float	m_fAtkSpeed;	// How fast will the zombie keep moving while attacking
 	public float	m_fWanderTimer;
 
 
